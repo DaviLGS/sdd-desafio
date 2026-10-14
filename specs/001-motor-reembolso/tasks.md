@@ -93,11 +93,11 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - sem motivos → `aprovada`;
     - só motivos de revisão → `em_revisao`;
     - `CATEGORIA_FORA_DA_POLITICA` + `FORA_DO_PERIODO` → `recusada`, com os dois motivos listados.
-  - **Commit:**
+  - **Commit:** `f60c3da`
 
 ## Fase 3 — Regras de negócio: limites
 
-- [ ] **T-012** — Dias de viagem a partir das hospedagens (noites; o dia da saída não conta; hospedagem em revisão conta).
+- [x] **T-012** — Dias de viagem a partir das hospedagens (noites; o dia da saída não conta; hospedagem em revisão conta).
   - **Atende:** RN-007, AMB-011, AMB-012, AMB-013
   - **Aceite:** `Rn007ViagemTest` passa:
     - hospedagem de 14/07 com 2 noites → 14 e 15 são de viagem, 16 não;
