@@ -113,9 +113,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - "PLANTÃO" → ampliado;
     - sábado em viagem → limite 90,00 (não 120,00) e ampliação `VIAGEM` (D-003);
     - dia útil sem viagem → `NENHUM`.
-  - **Commit:**
+  - **Commit:** `7124b69`
 
-- [ ] **T-014** — Grupos diários de alimentação e transporte com o limite do dia.
+- [x] **T-014** — Grupos diários de alimentação e transporte com o limite do dia.
   - **Atende:** RN-004, AMB-001, AMB-002, AMB-003, AMB-005
   - **Aceite:** `Rn004LimiteDiarioTest` passa:
     - 72,50 + 38,00 → total 110,50, reembolso 60,00;
