@@ -35,9 +35,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 - [x] **T-004** — Normalização de categoria (maiúsculas, minúsculas e acentos).
   - **Atende:** RN-001, AMB-020
   - **Aceite:** `Rn001NormalizacaoCategoriaTest` passa: `ALIMENTACAO`, `Alimentação` e `alimentacao` → `alimentacao`.
-  - **Commit:**
+  - **Commit:** `2aefedd`
 
-- [ ] **T-005** — Leitura e validação da entrada JSON, com valores lidos como decimais exatos.
+- [x] **T-005** — Leitura e validação da entrada JSON, com valores lidos como decimais exatos.
   - **Atende:** spec seção 4 (entrada e entrada malformada); plano DT-001
   - **Aceite:** `LeitorEntradaTest` passa:
     - lê `exemplos/despesas-exemplo.json` com 14 despesas;
