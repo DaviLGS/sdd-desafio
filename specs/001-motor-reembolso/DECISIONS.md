@@ -10,6 +10,33 @@ Ordem cronológica inversa: a mais recente primeiro.
 
 ---
 
+## D-002 — Leitura de noites: sem espaço e indicações múltiplas · `2026-10-14`
+
+**Gatilho:** implementação da T-010. Ao escrever a leitura do número de noites, o Claude
+encontrou dois casos que a RN-005 não decidia e os implementou antes de registrar na spec.
+O código foi segurado (sem commit) e as decisões levadas ao responsável antes de seguir.
+
+**O que mudou na spec (1.1 → 1.2):**
+- RN-005: "um número inteiro seguido de diária(s) ou noite(s)" passou a valer **com ou sem
+  espaço** entre o número e a palavra ("2diarias" = 2 noites).
+- RN-005 / AMB-004: descrição com **mais de uma indicação** de noites ("2 noites + 1 diaria")
+  passou a ser não identificável → `em_revisao`, `NOITES_NAO_IDENTIFICADAS`.
+- Seção 7: dois casos de borda novos.
+
+**Por quê:** "2diarias" é erro de digitação comum e continua inequívoco. Com duas indicações,
+qualquer escolha automática (primeira, soma) seria um palpite; a spec já manda para revisão o
+que não pode ser identificado.
+
+**O que isso invalidou:** nada. Nenhum teste existente mudou; o resultado do exemplo (seção 9)
+não muda.
+
+**Tasks afetadas:** T-010 (o aceite passa a incluir os dois casos; já coberto em
+`Rn005NoitesHospedagemTest`).
+
+**Custo:** 2 arquivos de spec; poucos minutos.
+
+---
+
 ## D-001 — Confirmação das decisões provisórias e categoria com acento · `2026-10-14`
 
 **Gatilho:** revisão da spec 1.0 pelo responsável. A seção 10 listava decisões

@@ -83,7 +83,8 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - "Hotel Rio - 2 diarias" → 2;
     - "Airbnb 3 noites" → 3;
     - "1 diária" → 1;
-    - "Hotel centro", "0 noites" e "duas noites" → `NOITES_NAO_IDENTIFICADAS`.
+    - "Hotel 2diarias" (sem espaço) → 2 (D-002);
+    - "Hotel centro", "0 noites", "duas noites" e "2 noites + 1 diaria" → `NOITES_NAO_IDENTIFICADAS` (D-002).
   - **Commit:**
 
 - [ ] **T-011** — Consolidação do status a partir dos motivos.

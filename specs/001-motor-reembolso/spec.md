@@ -1,6 +1,6 @@
 # Spec — Motor de Cálculo de Reembolso
 
-**Versão:** 1.1 · **Status:** rascunho · **Última alteração:** 2026-10-14
+**Versão:** 1.2 · **Status:** rascunho · **Última alteração:** 2026-10-14
 
 > **Regra de ouro deste arquivo:** ele descreve o QUÊ e o PORQUÊ. Nenhuma linha
 > aqui pode citar linguagem, biblioteca, classe, função ou estrutura de pasta.
@@ -149,13 +149,15 @@ Valores negativos são arredondados pelo valor absoluto, mantendo o sinal.
 - Alimentação de R$ 40,00 num dia → reembolsa 40,00, e o dia seguinte continua com limite de 60,00.
 
 ### RN-005 — Limite de hospedagem por noite
-**Regra:** cada despesa de hospedagem aprovada forma o seu próprio grupo. O número de noites é lido da descrição: um número inteiro seguido de "diária(s)" ou "noite(s)", sem diferenciar maiúsculas, minúsculas ou acentos. O limite do grupo é R$ 250,00 × noites, e o reembolso é o menor valor entre o valor da despesa e esse limite. Hospedagem **nunca** tem limite ampliado. Duas hospedagens que cobrem o mesmo dia são limitadas cada uma isoladamente, sem verificação de sobreposição. Se o número de noites não puder ser identificado (ausente, zero ou escrito por extenso), a despesa fica `em_revisao` com motivo `NOITES_NAO_IDENTIFICADAS`.
+**Regra:** cada despesa de hospedagem aprovada forma o seu próprio grupo. O número de noites é lido da descrição: um número inteiro seguido de "diária(s)" ou "noite(s)", com ou sem espaço entre eles, sem diferenciar maiúsculas, minúsculas ou acentos. O limite do grupo é R$ 250,00 × noites, e o reembolso é o menor valor entre o valor da despesa e esse limite. Hospedagem **nunca** tem limite ampliado. Duas hospedagens que cobrem o mesmo dia são limitadas cada uma isoladamente, sem verificação de sobreposição. Se o número de noites não puder ser identificado (ausente, zero, escrito por extenso, ou com mais de uma indicação na mesma descrição), a despesa fica `em_revisao` com motivo `NOITES_NAO_IDENTIFICADAS`.
 **Origem:** política do RH, itens 3 e 4 (AMB-004, AMB-013)
 **Aceite:**
 - R$ 480,00 com "2 diarias" → limite 500,00 → reembolsa 480,00.
 - R$ 750,00 com "3 noites" → limite 750,00 → reembolsa 750,00.
 - R$ 900,00 com "3 noites" → reembolsa 750,00.
 - R$ 300,00 com "Hotel centro" → `em_revisao`, `NOITES_NAO_IDENTIFICADAS`.
+- "Hotel 2diarias" (sem espaço) → 2 noites.
+- "Hotel 2 noites + 1 diaria" (duas indicações) → `em_revisao`, `NOITES_NAO_IDENTIFICADAS`.
 
 ### RN-006 — Nota fiscal obrigatória
 **Regra:** toda despesa com valor **maior ou igual a R$ 100,00** exige nota fiscal. A comparação usa o valor de **cada despesa** após a RN-002, e não o valor reembolsável nem a soma do dia. Sem nota fiscal, a despesa fica `em_revisao` com motivo `NF_AUSENTE`.
@@ -243,7 +245,7 @@ Uma despesa pode ter vários motivos e a saída lista todos. Se um dos motivos l
 #### AMB-004 — Diárias em um único lançamento de hospedagem
 **Texto original do RH:** "Hospedagem tem limite de R$ 250 por diária."
 **O que não está claro:** a entrada não informa o número de diárias; um lançamento pode cobrir várias noites (d-010: "2 diarias"; d-013: "3 noites").
-**Decisão:** o número de noites é lido da descrição, e o limite é R$ 250 × noites. Sem número identificável, a despesa vai para revisão.
+**Decisão:** o número de noites é lido da descrição, e o limite é R$ 250 × noites. Sem número identificável, ou com mais de uma indicação, a despesa vai para revisão.
 **Justificativa:** limitar um lançamento de várias noites a R$ 250 puniria quem lança a estadia de uma vez; adivinhar o número de noites seria pior que revisar.
 **Regra afetada:** RN-005
 
@@ -381,6 +383,8 @@ Uma despesa pode ter vários motivos e a saída lista todos. Se um dos motivos l
 | Estorno com despesa no dia | transporte 100,00 (NF) + −45,00 | Total 55,00, reembolso 55,00 | RN-011 |
 | Hospedagem com várias noites | 480,00, "2 diarias", com NF | Limite 500,00, reembolso 480,00 | RN-005 |
 | Hospedagem sem número de noites | 300,00, "Hotel centro", com NF | `em_revisao`, `NOITES_NAO_IDENTIFICADAS` | RN-005 |
+| Noites sem espaço | "Hotel 2diarias" | 2 noites | RN-005 |
+| Mais de uma indicação de noites | "Hotel 2 noites + 1 diaria", com NF | `em_revisao`, `NOITES_NAO_IDENTIFICADAS` | RN-005 |
 | Valor com 3 casas | 33,333 | Tratado como 33,33 | RN-002 |
 | Categoria em maiúsculas | `ALIMENTACAO` | Tratada como `alimentacao` | RN-001 |
 | Categoria com acento | `alimentação` | Tratada como `alimentacao` | RN-001 |
