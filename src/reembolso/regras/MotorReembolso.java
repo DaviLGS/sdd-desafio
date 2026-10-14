@@ -47,8 +47,10 @@ public final class MotorReembolso {
         // Passo 4: dias de viagem (RN-007), inclusive de hospedagens em revisão.
         Set<LocalDate> diasViagem = DiasViagem.calcular(despesas);
 
-        // Passo 5: estornos (RN-011).
-        resultados = Estornos.aplicar(resultados);
+        // Passo 5: estornos (RN-011). Com o status final definido, cada despesa ganha sua justificativa.
+        resultados = Estornos.aplicar(resultados).stream()
+                .map(r -> new ResultadoDespesa(r.despesa(), r.status(), r.motivos(), Justificativa.para(r, politica)))
+                .toList();
 
         // Passo 6: grupos e limites (RN-004, RN-005, RN-008).
         List<Grupo> grupos = new ArrayList<>();

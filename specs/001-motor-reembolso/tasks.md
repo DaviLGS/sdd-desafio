@@ -157,9 +157,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - `total_reembolsado` = 680,53;
     - quantidade 6/7/1;
     - duas execuções produzem resultado idêntico.
-  - **Commit:**
+  - **Commit:** `96e3a1a`
 
-- [ ] **T-018** — Justificativa textual de cada despesa.
+- [x] **T-018** — Justificativa textual de cada despesa.
   - **Atende:** spec seção 4 (`justificativa`)
   - **Aceite:** `JustificativaTest` passa: cada motivo gera seu texto fixo; despesa aprovada cita o grupo (`2026-07-03/alimentacao`); vários motivos aparecem todos.
   - **Commit:**
