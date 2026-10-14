@@ -1,6 +1,6 @@
 # Tasks — Motor de Cálculo de Reembolso
 
-**Baseado na spec:** 1.2 · **Baseado no plano:** 1.0
+**Baseado na spec:** 1.3 · **Baseado no plano:** 1.0
 
 > Cada task é pequena o bastante para virar **um commit**. Se você não consegue
 > descrever o critério de aceite como "o teste X passa", a task está grande demais.
@@ -111,7 +111,7 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - sábado → `FIM_DE_SEMANA_OU_PLANTAO`;
     - quarta com "Almoco - plantao" → ampliado;
     - "PLANTÃO" → ampliado;
-    - sábado em viagem → limite 90,00 (não 120,00);
+    - sábado em viagem → limite 90,00 (não 120,00) e ampliação `VIAGEM` (D-003);
     - dia útil sem viagem → `NENHUM`.
   - **Commit:**
 

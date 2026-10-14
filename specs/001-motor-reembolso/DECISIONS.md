@@ -10,6 +10,28 @@ Ordem cronológica inversa: a mais recente primeiro.
 
 ---
 
+## D-003 — Motivo da ampliação quando viagem e fim de semana coincidem · `2026-10-14`
+
+**Gatilho:** preparação da T-013. A RN-008 já dizia que as ampliações não acumulam, mas o campo
+de saída `limite_ampliado` aceita um único motivo, e a spec não dizia qual mostrar quando os dois
+se aplicam. Desta vez a lacuna foi levada ao responsável **antes** de escrever o código.
+
+**O que mudou na spec (1.2 → 1.3):**
+- RN-008: quando o dia é de viagem e também de fim de semana/plantão, `limite_ampliado` = `viagem`.
+- AMB-015: decisão complementada com o motivo informado.
+- Seção 7: o caso "Sábado em viagem" passou a informar o `limite_ampliado` esperado.
+
+**Por quê:** a viagem vem da política do RH (item 6); fim de semana/plantão é regra adicional
+(RN-008). Mostrar a regra da política facilita a auditoria.
+
+**O que isso invalidou:** nada. Só define um rótulo de saída; os valores não mudam.
+
+**Tasks afetadas:** T-013 (aceite inclui o rótulo).
+
+**Custo:** 3 arquivos de documentação; poucos minutos.
+
+---
+
 ## D-002 — Leitura de noites: sem espaço e indicações múltiplas · `2026-10-14`
 
 **Gatilho:** implementação da T-010. Ao escrever a leitura do número de noites, o Claude

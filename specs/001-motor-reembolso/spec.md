@@ -1,6 +1,6 @@
 # Spec — Motor de Cálculo de Reembolso
 
-**Versão:** 1.2 · **Status:** rascunho · **Última alteração:** 2026-10-14
+**Versão:** 1.3 · **Status:** rascunho · **Última alteração:** 2026-10-14
 
 > **Regra de ouro deste arquivo:** ele descreve o QUÊ e o PORQUÊ. Nenhuma linha
 > aqui pode citar linguagem, biblioteca, classe, função ou estrutura de pasta.
@@ -186,6 +186,9 @@ Valores negativos são arredondados pelo valor absoluto, mantendo o sinal.
 
 **Grupo com despesas de origens diferentes:** se ao menos uma despesa do grupo tem "plantão" na descrição, o grupo inteiro usa o limite ampliado.
 
+**Motivo informado na saída:** quando o dia é ao mesmo tempo de viagem e de fim de semana/plantão, o campo `limite_ampliado` informa `viagem`. A viagem vem da política do RH (item 6), e esta regra é adicional.
+- Alimentação num sábado que também é dia de viagem → `limite_ampliado` = `viagem`, limite 90,00.
+
 ### RN-009 — Duplicatas
 **Regra:** duas ou mais despesas com todos os campos iguais, exceto o `id` (data, categoria após a RN-001, descrição, fornecedor, valor após a RN-002 e nota fiscal), são duplicatas. **Todas** as cópias ficam `em_revisao` com motivo `DUPLICATA` e não são reembolsadas até que a revisão as resolva.
 **Origem:** política do RH, item 8 (AMB-016)
@@ -333,7 +336,7 @@ Uma despesa pode ter vários motivos e a saída lista todos. Se um dos motivos l
 #### AMB-015 — Viagem + fim de semana acumulam?
 **Texto original do RH:** —
 **O que não está claro:** se um dia de viagem que cai num sábado tem +50% ou +100%.
-**Decisão:** não acumula; o máximo é +50%.
+**Decisão:** não acumula; o máximo é +50%. Quando os dois se aplicam, a saída informa `viagem` como motivo da ampliação.
 **Justificativa:** os dois aumentos compensam a mesma coisa (gasto fora da rotina), e somá-los dobraria o limite.
 **Regra afetada:** RN-008
 
@@ -392,7 +395,7 @@ Uma despesa pode ter vários motivos e a saída lista todos. Se um dos motivos l
 | Dia de viagem | alimentação 85,00 em noite de hospedagem | Limite 90,00, reembolso 85,00 | RN-007 |
 | Dia de saída da hospedagem | alimentação 85,00 no dia seguinte à última noite | Limite 60,00, reembolso 60,00 | RN-007 |
 | Sábado | alimentação 85,00 | Limite 90,00, reembolso 85,00 | RN-008 |
-| Sábado em viagem | alimentação 100,00 | Limite 90,00 (não acumula), reembolso 90,00 | RN-008 |
+| Sábado em viagem | alimentação 100,00 | Limite 90,00 (não acumula), reembolso 90,00, `limite_ampliado` = `viagem` | RN-008 |
 
 ## 8. Ordem de aplicação das regras
 
