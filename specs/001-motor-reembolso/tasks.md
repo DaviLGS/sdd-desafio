@@ -134,9 +134,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - 900,00 / 3 → 750,00;
     - hospedagem em dia de viagem/sábado continua com 250/noite;
     - hospedagens sobrepostas são limitadas isoladamente.
-  - **Commit:**
+  - **Commit:** `dd069b5`
 
-- [ ] **T-016** — Estornos: abatem do grupo do dia (alimentação/transporte) ou vão para revisão.
+- [x] **T-016** — Estornos: abatem do grupo do dia (alimentação/transporte) ou vão para revisão.
   - **Atende:** RN-011, AMB-019
   - **Aceite:** `Rn011EstornoTest` passa:
     - transporte 100,00 + −45,00 → total 55,00, reembolso 55,00;
