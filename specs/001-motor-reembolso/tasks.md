@@ -194,7 +194,7 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 - [x] **T-022** — README do projeto: pré-requisitos, como compilar, rodar e testar, e o que foi construído.
   - **Atende:** entrega (README)
   - **Aceite:** seguindo só o README, num clone limpo, `mvn package` e o comando de exemplo geram a saída com total 680.53.
-  - **Commit:**
+  - **Commit:** `5e5bc96`
 
 ---
 
