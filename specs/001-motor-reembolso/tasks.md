@@ -171,14 +171,16 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - todos os valores com exatamente 2 casas (60 → `60.00`);
     - status e motivos em minúsculas/códigos da spec;
     - `noites` só em hospedagem.
-  - **Commit:**
+  - **Commit:** `04f2c39`
 
-- [ ] **T-020** — CLI `calcular --input X --output Y` com códigos de saída.
+- [x] **T-020** — CLI `calcular --input X --output Y` com códigos de saída.
   - **Atende:** spec seção 4 (entrada malformada); plano DT-005
   - **Aceite:** `MainCliTest` passa:
     - o exemplo gera um arquivo com `total_reembolsado` 680.53 e código 0;
     - entrada inválida → código 1 e nenhum arquivo criado;
-    - comando ou argumento ausente → código 2.
+    - comando ou argumento ausente → código 2;
+    - pasta de saída inexistente → código 3 (plano DT-005 v1.1);
+    - mensagens de console sem acentos.
   - **Commit:**
 
 ## Fase 5 — Casos de borda e documentação

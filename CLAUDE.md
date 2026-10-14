@@ -50,7 +50,8 @@ Se o que eu pedi não está coberto por nenhuma task, me avise em vez de impleme
 - Valores monetários: **sempre `BigDecimal`**, escala 2 após a RN-002. Nunca `double`/`float`,
   nem como passo intermediário. O JSON é lido com `USE_BIG_DECIMAL_FOR_FLOATS` (DT-001).
 - Erros: entrada inválida → `EntradaInvalidaException` → código de saída 1, sem arquivo de saída.
-  Uso incorreto da CLI → código 2 (DT-005).
+  Uso incorreto da CLI → código 2. Falha ao gravar a saída → código 3 (DT-005).
+  Mensagens de console sem acentos (o console do Windows os corrompe).
 - Testes: uma classe por RN, `RnNNN<Nome>Test`, com `@DisplayName("RN-NNN / AMB-NNN: <caso>")`.
   O nome do teste precisa permitir chegar à regra da spec sem adivinhar.
 - Ao concluir uma task: marque `[x]` em `tasks.md` e preencha o campo **Commit** no commit seguinte.
