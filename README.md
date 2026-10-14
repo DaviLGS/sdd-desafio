@@ -1,101 +1,101 @@
-# Desafio Prático — Spec Driven Development
+# Motor de Cálculo de Reembolso
 
-Aula bônus de SDD, fechando a trilha:
+CLI que lê um JSON com as despesas de um colaborador num período e gera um JSON dizendo, para
+cada despesa, se ela foi **aprovada**, está **em revisão** ou foi **recusada**, por quê, e quanto
+é reembolsável no total.
 
-`AI Fluency` → `Claude 101` → `Claude Code 101` → `Building with the Claude API` → `Claude Code in Action` → `Módulo SDD` → **Desafio**
-
-**Individual · 2 dias · Claude Code**
-
----
-
-## Comece por aqui
-
-1. **[`DESAFIO.md`](DESAFIO.md)** — o enunciado. Leia inteiro antes de escrever qualquer coisa.
-2. **[`RUBRICA.md`](RUBRICA.md)** — como você é avaliado. É pública de propósito; leia antes de começar.
-3. **[`exemplos/despesas-exemplo.json`](exemplos/despesas-exemplo.json)** — a entrada de referência. Não é decoração: percorra item por item antes de escrever a spec.
-4. **[`FAQ.md`](FAQ.md)** — travou? Comece por aqui. **O instrutor está fora durante o desafio**, então o FAQ é o canal de suporte.
+Projeto feito para o [Desafio SDD](DESAFIO.md) (Spec Driven Development). A política de reembolso
+do RH é ambígua; todas as interpretações estão decididas e justificadas na
+[spec](specs/001-motor-reembolso/spec.md).
 
 ---
 
-## Como participar
+## Pré-requisitos
 
-**1. Faça um fork deste repositório.** Ele precisa ser público, ou você não conseguirá compartilhar depois.
+| Ferramenta | Versão | Conferir com |
+|---|---|---|
+| JDK | 17 ou superior (testado com 25) | `java -version` |
+| Maven | 3.9 ou superior (testado com 3.9.12) | `mvn -v` |
 
-**2. Clone o seu fork e prepare a estrutura de trabalho:**
+Na primeira compilação o Maven baixa as dependências (Jackson e JUnit 5), então é preciso internet.
+
+## Compilar e rodar
 
 ```bash
-git clone https://github.com/<seu-usuario>/sdd-desafio.git
-cd sdd-desafio
-cp template/CLAUDE.md .
-cp -r template/specs .
-cp -r template/docs .
-git add -A && git commit -m "chore: estrutura inicial a partir do template"
+mvn package
 ```
 
-<details>
-<summary>PowerShell</summary>
+Isso compila, roda os testes e gera `target/motor-reembolso.jar`. Depois:
 
-```powershell
-git clone https://github.com/<seu-usuario>/sdd-desafio.git
-cd sdd-desafio
-Copy-Item template\CLAUDE.md .
-Copy-Item template\specs . -Recurse
-Copy-Item template\docs . -Recurse
-git add -A; git commit -m "chore: estrutura inicial a partir do template"
-```
-</details>
-
-Os arquivos em `template/` são esqueletos com as perguntas que cada documento precisa responder. Deixe a pasta `template/` onde está — ela serve de referência.
-
-**3. Trabalhe no seu fork**, seguindo as três regras do jogo descritas no [`DESAFIO.md`](DESAFIO.md):
-
-- Nenhum commit sem task
-- Explicação no chat que não está na spec é bug de spec
-- Interações exportadas (`/export`) e commitadas em `docs/sessions/`
-
-**4. No Dia 2, às 10h**, você recebe uma mudança de requisito pelo canal da turma. Ela é obrigatória e vale 20 pontos. Chegue nesse momento com o sistema base funcionando e testado.
-
-> Durante os dois dias o instrutor está de férias e não responde mensagens. Dúvida de processo: [`FAQ.md`](FAQ.md). Dúvida sobre o que a política do RH significa não tem resposta — decidir isso é o exercício.
-
-**5. Entregue** enviando o link do seu fork no formulário. Prazo: **Dia 2, 18h**.
-
----
-
-## O que o seu fork precisa conter ao final
-
-```
-seu-fork/
-├── CLAUDE.md                     # convenções do projeto para o agente
-├── README.md                     # como rodar e como testar o SEU projeto
-├── specs/
-│   └── 001-motor-reembolso/
-│       ├── spec.md               # o QUÊ e o PORQUÊ
-│       ├── plan.md               # o COMO
-│       ├── tasks.md              # T-001..T-0NN, com critério de aceite
-│       └── DECISIONS.md          # log de mudanças de spec
-├── src/
-├── tests/
-└── docs/
-    ├── sessions/                 # exports das suas conversas com o Claude
-    └── RELATORIO.md              # o relatório final
+```bash
+java -jar target/motor-reembolso.jar calcular --input exemplos/despesas-exemplo.json --output resultado.json
 ```
 
-Sobre o `README.md`: substitua este arquivo pelo README do **seu** projeto — como rodar, como testar, o que você construiu. Um README que não permite rodar o projeto custa pontos.
+Saída esperada no console:
 
----
+```
+reembolso calculado: R$ 680.53 - saida gravada em resultado.json
+```
 
-## Antes de começar, confirme que o `/export` funciona
+O comando é o mesmo no Bash, no PowerShell e no Prompt de Comando.
 
-Abra o Claude Code, troque duas mensagens, rode `/export` e confirme que o arquivo foi gerado.
+### Códigos de saída
 
-Faça isso **agora**, não no Dia 2. Sem `docs/sessions/`, o critério de relatório vale zero — e já aconteceu de gente que fez tudo certo descobrir no último dia que não tinha registro nenhum do trabalho.
+| Código | Significado |
+|---|---|
+| `0` | Sucesso; o arquivo de saída foi gravado |
+| `1` | Entrada inválida (JSON malformado, campo ausente, data inválida…); nenhum arquivo é gravado |
+| `2` | Uso incorreto (comando ou opção faltando/desconhecida) |
+| `3` | Falha ao gravar a saída (ex.: pasta inexistente) |
 
-Exporte ao final de **cada** sessão, nomeando `docs/sessions/01-descricao-curta.md`, `02-...`, e assim por diante.
+## Testar
 
----
+```bash
+mvn test
+```
 
-## O resumo em um parágrafo
+São 237 testes. Os nomes remetem às regras da spec. Por exemplo:
+- `Rn006NotaFiscalTest` testa a RN-006;
+- `CasosDeBordaTest` tem um teste por linha da seção 7 da spec, e falha se uma linha nova da spec ficar sem teste;
+- `MotorReembolsoExemploTest` confere o arquivo de exemplo contra a tabela da seção 9.
 
-Você vai receber uma política de reembolso escrita por um RH, com a redação ruim que uma política de RH real tem. Ela é ambígua em vários pontos, e você não tem acesso a ninguém para tirar dúvida. O trabalho não é implementar — é **especificar**: encontrar cada ambiguidade, decidir explicitamente, justificar e registrar. O produto funcionando vale **10 dos 100 pontos**. Os outros 90 estão na spec, na rastreabilidade `spec → tasks → commits → testes`, na resposta à mudança de requisito do Dia 2 e no relatório.
+## Entrada e saída
 
-Isso é deliberado. Um projeto que roda perfeitamente com spec fraca tira nota baixa; um projeto com bug conhecido, spec impecável e trilha limpa tira nota alta.
+- **Entrada:** o formato de [`exemplos/despesas-exemplo.json`](exemplos/despesas-exemplo.json).
+- **Saída:** definida na [seção 4 da spec](specs/001-motor-reembolso/spec.md#4-entrada-e-saída). Em resumo:
+  - **`despesas`:** uma linha por despesa da entrada, com `status`, `motivos` e `justificativa`.
+  - **`grupos`:** onde os limites são aplicados, com a soma do que foi gasto, o limite, a ampliação e o valor reembolsado. Há um grupo por dia e categoria para alimentação e transporte, e um por hospedagem.
+  - **`resumo`:** o `total_reembolsado` e a quantidade de despesas por status.
+
+Para o arquivo de exemplo: **R$ 680,53** reembolsados; 6 despesas aprovadas, 7 em revisão, 1 recusada.
+
+## Documentação
+
+| Arquivo | O que tem |
+|---|---|
+| [`spec.md`](specs/001-motor-reembolso/spec.md) | **O quê e por quê:** regras (RN-001…RN-012), as 20 ambiguidades da política e a decisão de cada uma, casos de borda, critérios de aceite |
+| [`plan.md`](specs/001-motor-reembolso/plan.md) | **Como:** stack, arquitetura, decisões técnicas (DT-001…DT-006), estratégia de testes |
+| [`tasks.md`](specs/001-motor-reembolso/tasks.md) | **Em que ordem:** T-001…T-022, cada uma com requisitos, aceite e commit; matriz de cobertura |
+| [`DECISIONS.md`](specs/001-motor-reembolso/DECISIONS.md) | Log de cada mudança de spec: o que mudou, por quê, o que quebrou |
+| [`docs/sessions/`](docs/sessions) | Exports das conversas com o Claude Code |
+| [`docs/RELATORIO.md`](docs/RELATORIO.md) | Relatório final do desafio |
+| [`CLAUDE.md`](CLAUDE.md) | Convenções do projeto para o agente |
+
+## Estrutura
+
+```
+src/reembolso/
+├── cli/       Main: linha de comando e códigos de saída
+├── io/        leitura/validação da entrada e escrita da saída (JSON)
+├── dominio/   records e enums (Despesa, Resultado, Grupo, Status, Motivo…)
+└── regras/    regras de negócio puras, sem I/O — uma classe por regra + MotorReembolso
+tests/reembolso/   testes, espelhando os pacotes acima
+```
+
+Os valores da política (60, 80, 250, +50%, piso da NF) existem só em
+[`Politica.java`](src/reembolso/regras/Politica.java).
+
+## Sobre o desafio
+
+O enunciado original, a rubrica e o FAQ continuam em [`DESAFIO.md`](DESAFIO.md),
+[`RUBRICA.md`](RUBRICA.md) e [`FAQ.md`](FAQ.md).

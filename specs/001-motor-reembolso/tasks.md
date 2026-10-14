@@ -189,9 +189,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 - [x] **T-021** — Bateria dos casos de borda da seção 7 da spec, rodando pelo motor completo.
   - **Atende:** spec seção 7 (todas as linhas)
   - **Aceite:** `CasosDeBordaTest` passa, com um teste por linha da tabela da seção 7 e o `@DisplayName` igual ao texto da coluna "Caso"; um teste lê a spec e falha se alguma linha da seção 7 ficar sem teste.
-  - **Commit:**
+  - **Commit:** `8493181`
 
-- [ ] **T-022** — README do projeto: pré-requisitos, como compilar, rodar e testar, e o que foi construído.
+- [x] **T-022** — README do projeto: pré-requisitos, como compilar, rodar e testar, e o que foi construído.
   - **Atende:** entrega (README)
   - **Aceite:** seguindo só o README, num clone limpo, `mvn package` e o comando de exemplo geram a saída com total 680.53.
   - **Commit:**
