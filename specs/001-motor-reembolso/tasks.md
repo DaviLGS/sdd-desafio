@@ -17,7 +17,7 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 
 ## Fase 1 — Fundação
 
-- [ ] **T-001** — Criar o projeto Maven: alvo Java 17, `src/` e `tests/` na raiz, JUnit 5, Jackson e geração do JAR executável.
+- [x] **T-001** — Criar o projeto Maven: alvo Java 17, `src/` e `tests/` na raiz, JUnit 5, Jackson e geração do JAR executável.
   - **Atende:** plano DT-003, DT-004
   - **Aceite:** `mvn test` executa e passa o `ProjetoSmokeTest`; `mvn package` gera `target/motor-reembolso.jar`.
   - **Commit:**
