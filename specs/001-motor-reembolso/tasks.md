@@ -25,9 +25,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 - [x] **T-002** — Modelo de domínio (records e enums da seção 3 do plano) e `Politica.V3` com os valores da política.
   - **Atende:** spec seção 4; plano seções 3 e 4
   - **Aceite:** `PoliticaTest` passa (limites 60/80/250, fator 1,5, piso da NF 100,00, 3 categorias elegíveis).
-  - **Commit:**
+  - **Commit:** `3014e50`
 
-- [ ] **T-003** — Arredondamento em cadeia para 2 casas.
+- [x] **T-003** — Arredondamento em cadeia para 2 casas.
   - **Atende:** RN-002, AMB-010
   - **Aceite:** `Rn002ArredondamentoTest` passa, cobrindo 33,333 → 33,33; 3,444 → 3,44; 3,445 → 3,45; 3,4449 → 3,45; −3,445 → −3,45; valor com 2 casas inalterado.
   - **Commit:**
