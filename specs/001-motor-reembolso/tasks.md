@@ -103,9 +103,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - hospedagem de 14/07 com 2 noites → 14 e 15 são de viagem, 16 não;
     - hospedagem sem NF com 3 noites ainda gera dias de viagem;
     - hospedagem sem noites identificáveis não gera.
-  - **Commit:**
+  - **Commit:** `20faa4f`
 
-- [ ] **T-013** — Ampliação por fim de semana ou plantão, sem acumular com a viagem.
+- [x] **T-013** — Ampliação por fim de semana ou plantão, sem acumular com a viagem.
   - **Atende:** RN-008, AMB-014, AMB-015
   - **Aceite:** `Rn008FimDeSemanaPlantaoTest` passa:
     - sábado → `FIM_DE_SEMANA_OU_PLANTAO`;

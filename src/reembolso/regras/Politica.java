@@ -1,7 +1,9 @@
 package reembolso.regras;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Set;
+import reembolso.dominio.Ampliacao;
 
 /**
  * Valores da política de reembolso. Único lugar do código onde eles existem (plano, seção 4).
@@ -36,5 +38,20 @@ public record Politica(
 
     public Politica {
         categoriasElegiveis = Set.copyOf(categoriasElegiveis);
+    }
+
+    /**
+     * Limite diário de alimentação ou transporte urbano, base ou ampliado (RN-004, RN-007, RN-008).
+     *
+     * @throws IllegalArgumentException para hospedagem (limite por noite, RN-005) ou outra categoria
+     */
+    public BigDecimal limiteDiario(String categoria, Ampliacao ampliacao) {
+        BigDecimal base = switch (categoria) {
+            case ALIMENTACAO -> limiteAlimentacaoDia;
+            case TRANSPORTE_URBANO -> limiteTransporteDia;
+            default -> throw new IllegalArgumentException("categoria sem limite diário: " + categoria);
+        };
+        BigDecimal limite = ampliacao == Ampliacao.NENHUM ? base : base.multiply(fatorAmpliacao);
+        return limite.setScale(2, RoundingMode.HALF_UP);
     }
 }
