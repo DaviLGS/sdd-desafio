@@ -1,6 +1,6 @@
 # Spec — Motor de Cálculo de Reembolso
 
-**Versão:** 1.0 · **Status:** rascunho · **Última alteração:** 2026-10-14
+**Versão:** 1.1 · **Status:** rascunho · **Última alteração:** 2026-10-14
 
 > **Regra de ouro deste arquivo:** ele descreve o QUÊ e o PORQUÊ. Nenhuma linha
 > aqui pode citar linguagem, biblioteca, classe, função ou estrutura de pasta.
@@ -51,7 +51,7 @@ Conforme `exemplos/despesas-exemplo.json`.
 | `periodo.fim` | data `AAAA-MM-DD` | Último dia do período (inclusivo) | sim |
 | `despesas[].id` | texto | Identificador único da despesa | sim |
 | `despesas[].data` | data `AAAA-MM-DD` | Dia em que a despesa ocorreu | sim |
-| `despesas[].categoria` | texto | Categoria; comparada sem diferenciar maiúsculas e minúsculas (RN-001) | sim |
+| `despesas[].categoria` | texto | Categoria; comparada sem diferenciar maiúsculas, minúsculas e acentos (RN-001) | sim |
 | `despesas[].descricao` | texto | Descrição livre | sim |
 | `despesas[].fornecedor` | texto | Fornecedor | sim |
 | `despesas[].valor` | número | Valor em R$. Pode ter mais de 2 casas decimais (RN-002) e pode ser negativo, no caso de estorno (RN-011) | sim |
@@ -70,7 +70,7 @@ saída.
 | `despesas[]` | lista | Uma linha por despesa de entrada, na mesma ordem |
 | `despesas[].id` | texto | ID da despesa |
 | `despesas[].data` | data | Data da despesa |
-| `despesas[].categoria` | texto | Categoria normalizada, em minúsculas |
+| `despesas[].categoria` | texto | Categoria normalizada, em minúsculas e sem acentos |
 | `despesas[].valor` | número (2 casas) | Valor após o arredondamento da RN-002 |
 | `despesas[].status` | `aprovada` \| `em_revisao` \| `recusada` | Situação da despesa (RN-012) |
 | `despesas[].motivos` | lista de códigos | Motivos de revisão ou recusa; vazia se aprovada (tabela abaixo) |
@@ -123,14 +123,15 @@ saída.
 ## 5. Regras de negócio
 
 ### RN-001 — Normalização de categoria
-**Regra:** a categoria é comparada sem diferenciar maiúsculas e minúsculas. `ALIMENTACAO`, `Alimentacao` e `alimentacao` são a mesma categoria.
+**Regra:** a categoria é comparada sem diferenciar maiúsculas, minúsculas e acentos. `ALIMENTACAO`, `Alimentação` e `alimentacao` são a mesma categoria.
 **Origem:** dados de entrada (AMB-020)
-**Aceite:** uma despesa com categoria `ALIMENTACAO` é tratada como alimentação e aparece na saída como `alimentacao`.
+**Aceite:** despesas com categoria `ALIMENTACAO` ou `alimentação` são tratadas como alimentação e aparecem na saída como `alimentacao`.
 
 ### RN-002 — Arredondamento
 **Regra:** todo valor de entrada com mais de 2 casas decimais é arredondado para 2 casas **antes de qualquer outra regra**. O arredondamento é feito em cadeia, do último dígito para a esquerda, até restarem 2 casas: um dígito de 0 a 4 é descartado; de 5 a 9, soma 1 à casa anterior.
+Valores negativos são arredondados pelo valor absoluto, mantendo o sinal.
 **Origem:** dados de entrada (AMB-010)
-**Aceite:** 33,333 → 33,33 · 3,444 → 3,44 · 3,445 → 3,45 · 3,4449 → 3,445 → 3,45.
+**Aceite:** 33,333 → 33,33 · 3,444 → 3,44 · 3,445 → 3,45 · 3,4449 → 3,445 → 3,45 · −3,445 → −3,45.
 
 ### RN-003 — Categorias elegíveis
 **Regra:** apenas `alimentacao`, `transporte_urbano` e `hospedagem` são reembolsáveis. Qualquer outra categoria resulta em status `recusada`, motivo `CATEGORIA_FORA_DA_POLITICA`, e reembolso de R$ 0,00.
@@ -138,7 +139,7 @@ saída.
 **Aceite:** uma despesa `coworking` de R$ 89,00 tem status `recusada` e não entra em nenhum grupo.
 
 ### RN-004 — Limite diário de alimentação e transporte
-**Regra:** as despesas aprovadas de alimentação de um mesmo dia formam um grupo, e as de transporte urbano também. O reembolso do grupo é o menor valor entre a soma do grupo e o limite do dia. O excedente não é reembolsado. O limite não usado em um dia **não acumula** para outros dias.
+**Regra:** as despesas aprovadas de alimentação de um mesmo dia formam um grupo, e as de transporte urbano também. O reembolso do grupo é o menor valor entre a soma do grupo e o limite do dia. O excedente não é reembolsado. O limite não usado em um dia **não acumula** para outros dias. Despesas de valor zero são aprovadas normalmente e não alteram o reembolso.
 - Limite base: alimentação R$ 60,00/dia; transporte urbano R$ 80,00/dia.
 - Limite ampliado (RN-007 ou RN-008): alimentação R$ 90,00/dia; transporte urbano R$ 120,00/dia.
 
@@ -148,7 +149,7 @@ saída.
 - Alimentação de R$ 40,00 num dia → reembolsa 40,00, e o dia seguinte continua com limite de 60,00.
 
 ### RN-005 — Limite de hospedagem por noite
-**Regra:** cada despesa de hospedagem aprovada forma o seu próprio grupo. O número de noites é lido da descrição: um número inteiro seguido de "diária(s)" ou "noite(s)", sem diferenciar maiúsculas, minúsculas ou acentos. O limite do grupo é R$ 250,00 × noites, e o reembolso é o menor valor entre o valor da despesa e esse limite. Hospedagem **nunca** tem limite ampliado. Se o número de noites não puder ser identificado (ausente, zero ou escrito por extenso), a despesa fica `em_revisao` com motivo `NOITES_NAO_IDENTIFICADAS`.
+**Regra:** cada despesa de hospedagem aprovada forma o seu próprio grupo. O número de noites é lido da descrição: um número inteiro seguido de "diária(s)" ou "noite(s)", sem diferenciar maiúsculas, minúsculas ou acentos. O limite do grupo é R$ 250,00 × noites, e o reembolso é o menor valor entre o valor da despesa e esse limite. Hospedagem **nunca** tem limite ampliado. Duas hospedagens que cobrem o mesmo dia são limitadas cada uma isoladamente, sem verificação de sobreposição. Se o número de noites não puder ser identificado (ausente, zero ou escrito por extenso), a despesa fica `em_revisao` com motivo `NOITES_NAO_IDENTIFICADAS`.
 **Origem:** política do RH, itens 3 e 4 (AMB-004, AMB-013)
 **Aceite:**
 - R$ 480,00 com "2 diarias" → limite 500,00 → reembolsa 480,00.
@@ -166,7 +167,7 @@ saída.
 - Dois táxis de R$ 60,00 e R$ 50,00 no mesmo dia, sem NF → nenhum dos dois exige NF.
 
 ### RN-007 — Colaborador em viagem
-**Regra:** um dia é "de viagem" quando está coberto por uma noite de hospedagem. Uma hospedagem com data D e N noites cobre os dias D, D+1, …, D+N−1; o dia da saída (D+N) **não** é de viagem. Em dias de viagem, os limites de alimentação e transporte urbano são ampliados em 50% (RN-004). A hospedagem não é ampliada.
+**Regra:** um dia é "de viagem" quando está coberto por uma noite de hospedagem. Uma hospedagem com data D e N noites cobre os dias D, D+1, …, D+N−1; o dia da saída (D+N) **não** é de viagem. Uma hospedagem conta para a viagem sempre que o seu número de noites é identificável (RN-005), mesmo que ela própria esteja `em_revisao` por outro motivo (ex.: falta de NF). Em dias de viagem, os limites de alimentação e transporte urbano são ampliados em 50% (RN-004). A hospedagem não é ampliada.
 **Origem:** política do RH, item 6 (AMB-011, AMB-012, AMB-013)
 **Aceite:**
 - Hospedagem em 14/07 com 2 noites → os dias 14/07 e 15/07 são de viagem e 16/07 não é.
@@ -196,7 +197,7 @@ saída.
 - Despesa de 15/04 → `em_revisao`, `FORA_DO_PERIODO`.
 
 ### RN-011 — Estorno (valor negativo)
-**Regra:** uma despesa com valor negativo é um estorno. Ele abate do grupo da mesma categoria no mesmo dia (RN-004), entrando na soma do grupo antes da aplicação do limite. Se no mesmo dia e categoria não houver despesas aprovadas cuja soma seja maior ou igual ao valor absoluto do estorno, o estorno fica `em_revisao` com motivo `ESTORNO_SEM_DESPESA` e não entra em nenhum grupo.
+**Regra:** uma despesa com valor negativo é um estorno. Em alimentação e transporte urbano, ele abate do grupo da mesma categoria no mesmo dia (RN-004), entrando na soma do grupo antes da aplicação do limite. Estorno de hospedagem vai sempre para revisão (`ESTORNO_SEM_DESPESA`), pois hospedagem não é agrupada por dia. Se no mesmo dia e categoria não houver despesas aprovadas cuja soma seja maior ou igual ao valor absoluto do estorno, o estorno fica `em_revisao` com motivo `ESTORNO_SEM_DESPESA` e não entra em nenhum grupo.
 **Origem:** dados de entrada; a política não trata estornos (AMB-019)
 **Aceite:**
 - Transporte de R$ 100,00 com NF + estorno de −R$ 45,00 no mesmo dia → `valor_total` 55,00, reembolsa 55,00.
@@ -358,7 +359,7 @@ Uma despesa pode ter vários motivos e a saída lista todos. Se um dos motivos l
 #### AMB-020 — Grafia da categoria
 **Texto original do RH:** "Categorias fora da política não são reembolsáveis."
 **O que não está claro:** se `ALIMENTACAO` (d-014) é uma categoria diferente de `alimentacao`.
-**Decisão:** é a mesma categoria; a comparação ignora maiúsculas e minúsculas.
+**Decisão:** é a mesma categoria; a comparação ignora maiúsculas, minúsculas e acentos.
 **Justificativa:** diferença de digitação não muda a natureza do gasto.
 **Regra afetada:** RN-001
 
@@ -382,6 +383,8 @@ Uma despesa pode ter vários motivos e a saída lista todos. Se um dos motivos l
 | Hospedagem sem número de noites | 300,00, "Hotel centro", com NF | `em_revisao`, `NOITES_NAO_IDENTIFICADAS` | RN-005 |
 | Valor com 3 casas | 33,333 | Tratado como 33,33 | RN-002 |
 | Categoria em maiúsculas | `ALIMENTACAO` | Tratada como `alimentacao` | RN-001 |
+| Categoria com acento | `alimentação` | Tratada como `alimentacao` | RN-001 |
+| Estorno de hospedagem | hospedagem −100,00 | `em_revisao`, `ESTORNO_SEM_DESPESA` | RN-011 |
 | Dia de viagem | alimentação 85,00 em noite de hospedagem | Limite 90,00, reembolso 85,00 | RN-007 |
 | Dia de saída da hospedagem | alimentação 85,00 no dia seguinte à última noite | Limite 60,00, reembolso 60,00 | RN-007 |
 | Sábado | alimentação 85,00 | Limite 90,00, reembolso 85,00 | RN-008 |
@@ -393,7 +396,7 @@ Uma despesa pode ter vários motivos e a saída lista todos. Se um dos motivos l
 2. **Verificações por despesa**, que podem gerar motivos de revisão ou recusa. Todas são avaliadas e todos os motivos são listados:
    categoria (RN-003) · período (RN-010) · duplicata (RN-009) · nota fiscal (RN-006) · noites de hospedagem (RN-005).
 3. **Status** de cada despesa (RN-012). Despesas `em_revisao` e `recusadas` saem do cálculo e **não consomem limite**.
-4. **Dias de viagem** (RN-007), a partir das hospedagens com número de noites identificável (ver seção 10, item 1).
+4. **Dias de viagem** (RN-007), a partir das hospedagens com número de noites identificável, mesmo as que estão em revisão.
 5. **Estornos** (RN-011): abatidos dos grupos, ou enviados para revisão.
 6. **Grupos e limites** (RN-004, RN-005, RN-008): soma das despesas aprovadas, limite (base ou ampliado), reembolso = menor valor entre os dois.
 7. **Resumo**: soma dos reembolsos dos grupos.
@@ -433,12 +436,6 @@ Para `exemplos/despesas-exemplo.json` (julho de 2026), o sistema produz:
 
 ## 10. O que fica em aberto
 
-Decisões provisórias tomadas ao redigir esta spec, **ainda não confirmadas pelo responsável**:
+1. **RN-008 (fim de semana/plantão)** não vem da política do RH. Deve ser validada com o RH antes do uso em produção.
 
-1. **Hospedagem em revisão conta como viagem?** Provisório: sim, desde que o número de noites seja identificável. A pendência da hospedagem é documental e a viagem ocorreu. (Não afeta o exemplo: d-013 não tem outras despesas nos dias cobertos.)
-2. **Estorno em hospedagem ou alimentação:** a decisão do responsável foi dada para transporte. Provisório: a mesma regra (abater do grupo da mesma categoria e dia) vale para alimentação. Estorno de hospedagem vai sempre para revisão, já que hospedagem não é agrupada por dia.
-3. **Arredondamento de valores negativos:** provisório: arredonda o valor absoluto e mantém o sinal.
-4. **Acentos na categoria:** provisório: `alimentação`, com acento, **não** é reconhecida (a RN-001 ignora só maiúsculas e minúsculas) e cai em `CATEGORIA_FORA_DA_POLITICA`.
-5. **Duas hospedagens cobrindo o mesmo dia:** provisório: cada uma é limitada isoladamente a R$ 250 × noites, sem verificação de sobreposição.
-6. **Valor zero:** provisório: aprovado normalmente, sem efeito no reembolso.
-7. **RN-008 (fim de semana/plantão)** não vem da política do RH. Deve ser validada com o RH antes do uso em produção.
+As decisões provisórias da versão 1.0 foram confirmadas pelo responsável e incorporadas às regras na versão 1.1 (ver `DECISIONS.md`, D-001).

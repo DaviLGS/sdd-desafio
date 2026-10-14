@@ -10,33 +10,31 @@ Ordem cronológica inversa: a mais recente primeiro.
 
 ---
 
-## D-002 — <título curto> · `<data>`
+## D-001 — Confirmação das decisões provisórias e categoria com acento · `2026-10-14`
 
-**Gatilho:** <o que provocou: envelope lacrado / erro descoberto na implementação /
-ambiguidade que só apareceu ao testar / o Claude apontou uma contradição>
+**Gatilho:** revisão da spec 1.0 pelo responsável. A seção 10 listava decisões
+provisórias redigidas pelo Claude que ainda não tinham sido confirmadas.
 
-**O que mudou na spec:** <de → para, citando o ID da regra>
+**O que mudou na spec (1.0 → 1.1):**
+- **RN-001 / AMB-020:** a categoria passou a ser comparada ignorando também acentos.
+  De "`alimentação` cai em `CATEGORIA_FORA_DA_POLITICA`" para "`alimentação` = `alimentacao`".
+  Esta foi a única decisão provisória **alterada** pelo responsável.
+- Decisões provisórias **confirmadas** e movidas da seção 10 para as regras:
+  - RN-002: valor negativo é arredondado pelo valor absoluto, mantendo o sinal.
+  - RN-004: despesa de valor zero é aprovada normalmente.
+  - RN-005: hospedagens sobrepostas são limitadas isoladamente.
+  - RN-007: hospedagem em revisão conta como viagem, se o número de noites for identificável.
+  - RN-011: o estorno também abate em alimentação; estorno de hospedagem vai para revisão.
+- Casos de borda adicionados: categoria com acento e estorno de hospedagem.
+- Seção 10: resta em aberto apenas a validação da RN-008 com o RH.
 
-**Por quê:**
+**Por quê:** decisões provisórias não confirmadas são regra de negócio que não foi
+decidida pelo responsável. Aceitar categoria com acento segue a justificativa já
+registrada na AMB-020: diferença de digitação não muda a natureza do gasto.
 
-**O que isso invalidou:** <requisitos, decisões técnicas, testes que caíram>
+**O que isso invalidou:** nada implementado (ainda não há código nem testes).
+O resultado esperado do exemplo (seção 9, R$ 680,53) não muda.
 
-**Tasks afetadas:** <as que precisaram ser refeitas + as novas criadas>
+**Tasks afetadas:** nenhuma (o `tasks.md` ainda não foi escrito).
 
-**Custo:** <quantos arquivos tocados, quanto tempo>
-
----
-
-## D-001 — <título curto> · `<data>`
-
-**Gatilho:**
-
-**O que mudou na spec:**
-
-**Por quê:**
-
-**O que isso invalidou:**
-
-**Tasks afetadas:**
-
-**Custo:**
+**Custo:** 2 arquivos (`spec.md`, `DECISIONS.md`), poucos minutos.
