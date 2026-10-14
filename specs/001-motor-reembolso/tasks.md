@@ -1,6 +1,6 @@
 # Tasks — Motor de Cálculo de Reembolso
 
-**Baseado na spec:** 1.1 · **Baseado no plano:** 1.0
+**Baseado na spec:** 1.2 · **Baseado no plano:** 1.0
 
 > Cada task é pequena o bastante para virar **um commit**. Se você não consegue
 > descrever o critério de aceite como "o teste X passa", a task está grande demais.
@@ -75,9 +75,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - 690,00 de hospedagem sem NF → `NF_AUSENTE`;
     - 60,00 + 50,00 no mesmo dia sem NF → ok;
     - estorno negativo sem NF → ok.
-  - **Commit:**
+  - **Commit:** `eceef83`
 
-- [ ] **T-010** — Leitura do número de noites na descrição da hospedagem.
+- [x] **T-010** — Leitura do número de noites na descrição da hospedagem.
   - **Atende:** RN-005, AMB-004
   - **Aceite:** `Rn005NoitesHospedagemTest` passa:
     - "Hotel Rio - 2 diarias" → 2;
