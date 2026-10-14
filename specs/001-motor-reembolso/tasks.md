@@ -182,13 +182,13 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - comando ou argumento ausente → código 2;
     - pasta de saída inexistente → código 3 (plano DT-005 v1.1);
     - mensagens de console sem acentos.
-  - **Commit:**
+  - **Commit:** `164cd5a`
 
 ## Fase 5 — Casos de borda e documentação
 
-- [ ] **T-021** — Bateria dos casos de borda da seção 7 da spec, rodando pelo motor completo.
+- [x] **T-021** — Bateria dos casos de borda da seção 7 da spec, rodando pelo motor completo.
   - **Atende:** spec seção 7 (todas as linhas)
-  - **Aceite:** `CasosDeBordaTest` passa, com um caso parametrizado por linha da tabela da seção 7 e o `@DisplayName` igual ao texto da coluna "Caso".
+  - **Aceite:** `CasosDeBordaTest` passa, com um teste por linha da tabela da seção 7 e o `@DisplayName` igual ao texto da coluna "Caso"; um teste lê a spec e falha se alguma linha da seção 7 ficar sem teste.
   - **Commit:**
 
 - [ ] **T-022** — README do projeto: pré-requisitos, como compilar, rodar e testar, e o que foi construído.
