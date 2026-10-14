@@ -124,9 +124,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - valor zero aprovado sem efeito;
     - despesas em revisão não entram no grupo;
     - sobra de um dia não passa para o seguinte.
-  - **Commit:**
+  - **Commit:** `1ec0bb2`
 
-- [ ] **T-015** — Grupo de hospedagem com limite de R$ 250 × noites, sem ampliação.
+- [x] **T-015** — Grupo de hospedagem com limite de R$ 250 × noites, sem ampliação.
   - **Atende:** RN-005, AMB-004, AMB-005, AMB-013
   - **Aceite:** `Rn005LimiteHospedagemTest` passa:
     - 480,00 / 2 noites → 480,00;

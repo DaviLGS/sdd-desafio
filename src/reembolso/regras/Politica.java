@@ -54,4 +54,9 @@ public record Politica(
         BigDecimal limite = ampliacao == Ampliacao.NENHUM ? base : base.multiply(fatorAmpliacao);
         return limite.setScale(2, RoundingMode.HALF_UP);
     }
+
+    /** Limite de uma hospedagem: limite por noite × noites, nunca ampliado (RN-005). */
+    public BigDecimal limiteHospedagem(int noites) {
+        return limiteHospedagemNoite.multiply(BigDecimal.valueOf(noites)).setScale(2, RoundingMode.HALF_UP);
+    }
 }
