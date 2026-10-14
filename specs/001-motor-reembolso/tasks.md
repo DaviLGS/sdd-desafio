@@ -50,9 +50,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 - [x] **T-006** — Categorias elegíveis: fora da política → `recusada`.
   - **Atende:** RN-003
   - **Aceite:** `Rn003CategoriaElegivelTest` passa: `coworking` → `CATEGORIA_FORA_DA_POLITICA`; as 3 categorias elegíveis passam.
-  - **Commit:**
+  - **Commit:** `54b5976`
 
-- [ ] **T-007** — Período de competência inclusivo; fora dele → revisão.
+- [x] **T-007** — Período de competência inclusivo; fora dele → revisão.
   - **Atende:** RN-010, AMB-017, AMB-018
   - **Aceite:** `Rn010PeriodoCompetenciaTest` passa: `inicio` e `fim` dentro; dia anterior ao `inicio` e posterior ao `fim` → `FORA_DO_PERIODO`; 15/04 num período de julho → `FORA_DO_PERIODO`.
   - **Commit:**
