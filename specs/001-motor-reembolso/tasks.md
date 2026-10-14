@@ -55,9 +55,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 - [x] **T-007** — Período de competência inclusivo; fora dele → revisão.
   - **Atende:** RN-010, AMB-017, AMB-018
   - **Aceite:** `Rn010PeriodoCompetenciaTest` passa: `inicio` e `fim` dentro; dia anterior ao `inicio` e posterior ao `fim` → `FORA_DO_PERIODO`; 15/04 num período de julho → `FORA_DO_PERIODO`.
-  - **Commit:**
+  - **Commit:** `20ac56b`
 
-- [ ] **T-008** — Detecção de duplicatas (todos os campos iguais, exceto o ID); todas as cópias vão para revisão.
+- [x] **T-008** — Detecção de duplicatas (todos os campos iguais, exceto o ID); todas as cópias vão para revisão.
   - **Atende:** RN-009, AMB-016
   - **Aceite:** `Rn009DuplicataTest` passa:
     - duas despesas idênticas → as duas com `DUPLICATA`;
