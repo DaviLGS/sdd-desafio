@@ -20,9 +20,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 - [x] **T-001** — Criar o projeto Maven: alvo Java 17, `src/` e `tests/` na raiz, JUnit 5, Jackson e geração do JAR executável.
   - **Atende:** plano DT-003, DT-004
   - **Aceite:** `mvn test` executa e passa o `ProjetoSmokeTest`; `mvn package` gera `target/motor-reembolso.jar`.
-  - **Commit:**
+  - **Commit:** `ce35fd0`
 
-- [ ] **T-002** — Modelo de domínio (records e enums da seção 3 do plano) e `Politica.V3` com os valores da política.
+- [x] **T-002** — Modelo de domínio (records e enums da seção 3 do plano) e `Politica.V3` com os valores da política.
   - **Atende:** spec seção 4; plano seções 3 e 4
   - **Aceite:** `PoliticaTest` passa (limites 60/80/250, fator 1,5, piso da NF 100,00, 3 categorias elegíveis).
   - **Commit:**
