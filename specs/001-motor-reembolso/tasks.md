@@ -43,11 +43,11 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - lê `exemplos/despesas-exemplo.json` com 14 despesas;
     - o d-011 chega com valor exato 33,333;
     - campo obrigatório ausente, data inválida ou valor não numérico → `EntradaInvalidaException`.
-  - **Commit:**
+  - **Commit:** `e93ca00`
 
 ## Fase 2 — Regras de negócio: verificações por despesa
 
-- [ ] **T-006** — Categorias elegíveis: fora da política → `recusada`.
+- [x] **T-006** — Categorias elegíveis: fora da política → `recusada`.
   - **Atende:** RN-003
   - **Aceite:** `Rn003CategoriaElegivelTest` passa: `coworking` → `CATEGORIA_FORA_DA_POLITICA`; as 3 categorias elegíveis passam.
   - **Commit:**
