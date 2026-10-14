@@ -64,9 +64,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - três cópias → as três;
     - diferença só na descrição → não é duplicata;
     - `ALIMENTACAO` × `alimentacao` com o resto igual → é duplicata.
-  - **Commit:**
+  - **Commit:** `4e36467`
 
-- [ ] **T-009** — Nota fiscal obrigatória a partir de R$ 100,00, por despesa e pelo valor gasto.
+- [x] **T-009** — Nota fiscal obrigatória a partir de R$ 100,00, por despesa e pelo valor gasto.
   - **Atende:** RN-006, AMB-006, AMB-007, AMB-008, AMB-009
   - **Aceite:** `Rn006NotaFiscalTest` passa:
     - 100,00 sem NF → `NF_AUSENTE`;
