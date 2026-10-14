@@ -34,16 +34,36 @@ Se o que eu pedi não está coberto por nenhuma task, me avise em vez de impleme
 
 ## Stack e comandos
 
-- Linguagem: `<...>`
-- Rodar: `<comando>`
-- Testes: `<comando>`
-- Lint/format: `<comando>`
+- Linguagem: Java, alvo `--release 17` (JDK 17+), build com Maven 3.9. Detalhes e motivos em `plan.md`.
+- Compilar/empacotar: `mvn package` → gera `target/motor-reembolso.jar`
+- Rodar: `java -jar target/motor-reembolso.jar calcular --input exemplos/despesas-exemplo.json --output resultado.json`
+- Testes: `mvn test`
+- Lint/format: não há linter configurado. Siga o estilo do código ao redor.
 
 ## Convenções de código
 
-- `<nomenclatura, estrutura de pastas, tratamento de erro, o que for relevante>`
-- Valores monetários: `<como são representados — decimal, centavos em inteiro, etc.>`
+- Pastas: código em `src/`, testes em `tests/` (não o layout padrão do Maven; ver `plan.md` DT-003).
+- Pacotes: `cli` (linha de comando), `io` (leitura/escrita de JSON), `dominio` (records e enums),
+  `regras` (regras de negócio puras, **sem I/O**). Só `cli` e `io` tocam disco ou JSON.
+- Valores da política (limites, fator de ampliação, piso da NF, categorias) vivem **apenas** em
+  `regras.Politica`. Nunca escreva 60, 80, 250, 100 ou 1.5 soltos no código.
+- Valores monetários: **sempre `BigDecimal`**, escala 2 após a RN-002. Nunca `double`/`float`,
+  nem como passo intermediário. O JSON é lido com `USE_BIG_DECIMAL_FOR_FLOATS` (DT-001).
+- Erros: entrada inválida → `EntradaInvalidaException` → código de saída 1, sem arquivo de saída.
+  Uso incorreto da CLI → código 2 (DT-005).
+- Testes: uma classe por RN, `RnNNN<Nome>Test`, com `@DisplayName("RN-NNN / AMB-NNN: <caso>")`.
+  O nome do teste precisa permitir chegar à regra da spec sem adivinhar.
+- Ao concluir uma task: marque `[x]` em `tasks.md` e preencha o campo **Commit** no commit seguinte.
+
+## Sessões
+
+- O `/export` não funciona neste ambiente. Ao fim de cada sessão, o usuário pede "exporta a sessão":
+  gere `docs/sessions/NN-descricao-curta.md` seguindo o formato de `docs/sessions/01-*.md`
+  (mensagens do usuário literais, respostas condensadas, sem dados pessoais) e commite com
+  `docs(sessions): exporta sessão NN — <descrição>`.
 
 ## Fora de escopo
 
-- `<o que este projeto explicitamente não faz — evita que o agente invente feature>`
+Lista oficial na seção 3 da `spec.md`. Em resumo: não paga, não resolve revisões (só sinaliza),
+não lê o conteúdo de notas fiscais, só R$, um colaborador e um período por execução, sem histórico
+entre execuções, sem regras por cargo ou centro de custo. Não invente feature fora disso. Pergunte.
