@@ -1,6 +1,6 @@
 # Plano Técnico — Motor de Cálculo de Reembolso
 
-**Versão:** 1.0 · **Baseado na spec:** 1.1
+**Versão:** 1.1 · **Baseado na spec:** 1.4
 
 > Aqui mora o COMO. Este arquivo pode e deve falar de linguagem, biblioteca e
 > arquitetura. O que ele **não** pode é introduzir regra de negócio nova — se
@@ -96,8 +96,9 @@ Os valores da política (limites base, fator de ampliação de 50%, piso da NF d
 **Consequência:** um `mvn package` produz o artefato final.
 
 ### DT-005 — Códigos de saída da CLI
-**Decisão:** `0` = sucesso; `1` = entrada inválida (RN de formato, seção 4), com mensagem em stderr e sem arquivo de saída; `2` = uso incorreto da CLI (comando ou argumentos).
+**Decisão:** `0` = sucesso; `1` = entrada inválida (RN de formato, seção 4), com mensagem em stderr e sem arquivo de saída; `2` = uso incorreto da CLI (comando ou argumentos); `3` = falha ao gravar o arquivo de saída (ex.: pasta inexistente).
 **Consequência:** é possível testar automaticamente que uma entrada inválida não gera saída.
+**Revisão (v1.1, T-020):** o código `3` foi acrescentado na implementação da CLI. Sem ele, uma falha de gravação teria de reutilizar o `1`, que significa "entrada inválida" e enganaria quem lê o código de saída. A mensagem de sucesso no console usa só ASCII, porque o console do Windows nem sempre está em UTF-8.
 
 ### DT-006 — Normalização de texto
 **Decisão:** categoria e descrição são comparadas após `Normalizer.Form.NFD`, remoção de marcas diacríticas e conversão para minúsculas. É o que a RN-001 (categoria) e a RN-008 ("plantão") exigem. O mesmo normalizador é usado para ler noites na RN-005 ("diária"/"noite").
