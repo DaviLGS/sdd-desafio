@@ -30,9 +30,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 - [x] **T-003** — Arredondamento em cadeia para 2 casas.
   - **Atende:** RN-002, AMB-010
   - **Aceite:** `Rn002ArredondamentoTest` passa, cobrindo 33,333 → 33,33; 3,444 → 3,44; 3,445 → 3,45; 3,4449 → 3,45; −3,445 → −3,45; valor com 2 casas inalterado.
-  - **Commit:**
+  - **Commit:** `9b1c73f`
 
-- [ ] **T-004** — Normalização de categoria (maiúsculas, minúsculas e acentos).
+- [x] **T-004** — Normalização de categoria (maiúsculas, minúsculas e acentos).
   - **Atende:** RN-001, AMB-020
   - **Aceite:** `Rn001NormalizacaoCategoriaTest` passa: `ALIMENTACAO`, `Alimentação` e `alimentacao` → `alimentacao`.
   - **Commit:**
