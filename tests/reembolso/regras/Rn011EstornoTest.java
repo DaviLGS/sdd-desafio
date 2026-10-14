@@ -164,6 +164,39 @@ class Rn011EstornoTest {
     }
 
     @Test
+    @DisplayName("RN-011 / RN-012 / D-005: estorno já em revisão (fora do período) também recebe ESTORNO_SEM_DESPESA")
+    void estorno_ja_em_revisao_recebe_o_motivo() {
+        var estorno = despesa("d-1", "2026-04-15", "transporte_urbano", "-45.00", false);
+        var emRevisao = new ResultadoDespesa(estorno, Status.EM_REVISAO, List.of(Motivo.FORA_DO_PERIODO), "");
+
+        ResultadoDespesa resultado = Estornos.aplicar(List.of(emRevisao)).get(0);
+
+        assertEquals(Status.EM_REVISAO, resultado.status());
+        assertEquals(List.of(Motivo.FORA_DO_PERIODO, Motivo.ESTORNO_SEM_DESPESA), resultado.motivos());
+    }
+
+    @Test
+    @DisplayName("RN-011 / D-005: estorno recusado (categoria fora) recebe o motivo e continua recusado")
+    void estorno_recusado_continua_recusado() {
+        var estorno = despesa("d-1", "2026-07-07", "coworking", "-20.00", false);
+        var recusado = new ResultadoDespesa(estorno, Status.RECUSADA, List.of(Motivo.CATEGORIA_FORA_DA_POLITICA), "");
+
+        ResultadoDespesa resultado = Estornos.aplicar(List.of(recusado)).get(0);
+
+        assertEquals(Status.RECUSADA, resultado.status());
+        assertEquals(List.of(Motivo.CATEGORIA_FORA_DA_POLITICA, Motivo.ESTORNO_SEM_DESPESA), resultado.motivos());
+    }
+
+    @Test
+    @DisplayName("RN-011: despesa positiva em revisão não recebe ESTORNO_SEM_DESPESA")
+    void despesa_positiva_em_revisao_inalterada() {
+        var taxi = despesa("d-1", "2026-07-06", "transporte_urbano", "100.00", false);
+        var emRevisao = new ResultadoDespesa(taxi, Status.EM_REVISAO, List.of(Motivo.NF_AUSENTE), "");
+
+        assertEquals(emRevisao, Estornos.aplicar(List.of(emRevisao)).get(0));
+    }
+
+    @Test
     @DisplayName("RN-011: a ordem dos resultados é preservada")
     void ordem_preservada() {
         var estorno = despesa("d-1", "2026-07-11", "transporte_urbano", "-45.00", false);

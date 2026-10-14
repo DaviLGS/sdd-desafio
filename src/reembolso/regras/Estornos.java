@@ -17,7 +17,8 @@ import reembolso.dominio.Status;
  * RN-011: estornos (valor negativo) abatem do grupo da mesma categoria e dia, ou vão para revisão.
  *
  * <p>Estornos aprovados continuam aprovados e entram na soma do grupo diário (RN-004). Os que não
- * podem ser abatidos recebem {@link Motivo#ESTORNO_SEM_DESPESA}.
+ * podem ser abatidos recebem {@link Motivo#ESTORNO_SEM_DESPESA} — inclusive os que já estavam em
+ * revisão ou recusados por outro motivo (D-005).
  */
 public final class Estornos {
 
@@ -57,10 +58,10 @@ public final class Estornos {
         List<ResultadoDespesa> atualizados = new ArrayList<>(resultados.size());
         for (ResultadoDespesa resultado : resultados) {
             Despesa despesa = resultado.despesa();
-            boolean semSaldo = resultado.status() == Status.APROVADA
-                    && estorno(despesa)
-                    && diasSemSaldo.contains(new ChaveDia(despesa.data(), despesa.categoria()));
-            atualizados.add(semSaldo ? paraRevisao(resultado) : resultado);
+            boolean abatido = resultado.status() == Status.APROVADA
+                    && !diasSemSaldo.contains(new ChaveDia(despesa.data(), despesa.categoria()));
+            // D-005: estorno que já tem outro motivo também recebe ESTORNO_SEM_DESPESA.
+            atualizados.add(estorno(despesa) && !abatido ? semDespesa(resultado) : resultado);
         }
         return atualizados;
     }
@@ -69,7 +70,7 @@ public final class Estornos {
         return despesa.valor().signum() < 0;
     }
 
-    private static ResultadoDespesa paraRevisao(ResultadoDespesa resultado) {
+    private static ResultadoDespesa semDespesa(ResultadoDespesa resultado) {
         List<Motivo> motivos = new ArrayList<>(resultado.motivos());
         motivos.add(Motivo.ESTORNO_SEM_DESPESA);
         return new ResultadoDespesa(resultado.despesa(), StatusDespesa.consolidar(motivos), motivos,
