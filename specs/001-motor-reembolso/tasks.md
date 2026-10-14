@@ -145,11 +145,11 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - 50,00 + −45,00 + −45,00 → os dois estornos com `ESTORNO_SEM_DESPESA` (D-004);
     - 100,00 + −30,00 + −20,00 → total 50,00 (D-004);
     - estorno de hospedagem → `ESTORNO_SEM_DESPESA`.
-  - **Commit:**
+  - **Commit:** `6ba2e66`
 
 ## Fase 4 — Saída e CLI
 
-- [ ] **T-017** — `MotorReembolso`: orquestração na ordem da seção 8 da spec e resumo.
+- [x] **T-017** — `MotorReembolso`: orquestração na ordem da seção 8 da spec e resumo.
   - **Atende:** spec seções 8 e 9; RN-001 a RN-012 integradas
   - **Aceite:** `MotorReembolsoExemploTest` passa:
     - com `exemplos/despesas-exemplo.json`, o status e os motivos de cada despesa batem com a tabela da seção 9;
