@@ -85,9 +85,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - "1 diária" → 1;
     - "Hotel 2diarias" (sem espaço) → 2 (D-002);
     - "Hotel centro", "0 noites", "duas noites" e "2 noites + 1 diaria" → `NOITES_NAO_IDENTIFICADAS` (D-002).
-  - **Commit:**
+  - **Commit:** `872f566`
 
-- [ ] **T-011** — Consolidação do status a partir dos motivos.
+- [x] **T-011** — Consolidação do status a partir dos motivos.
   - **Atende:** RN-012
   - **Aceite:** `Rn012StatusTest` passa:
     - sem motivos → `aprovada`;
