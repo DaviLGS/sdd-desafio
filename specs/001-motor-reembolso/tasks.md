@@ -1,6 +1,6 @@
 # Tasks — Motor de Cálculo de Reembolso
 
-**Baseado na spec:** 1.3 · **Baseado no plano:** 1.0
+**Baseado na spec:** 1.4 · **Baseado no plano:** 1.0
 
 > Cada task é pequena o bastante para virar **um commit**. Se você não consegue
 > descrever o critério de aceite como "o teste X passa", a task está grande demais.
@@ -142,6 +142,8 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
     - transporte 100,00 + −45,00 → total 55,00, reembolso 55,00;
     - −45,00 sozinho → `ESTORNO_SEM_DESPESA`;
     - estorno maior que a soma do dia → `ESTORNO_SEM_DESPESA`;
+    - 50,00 + −45,00 + −45,00 → os dois estornos com `ESTORNO_SEM_DESPESA` (D-004);
+    - 100,00 + −30,00 + −20,00 → total 50,00 (D-004);
     - estorno de hospedagem → `ESTORNO_SEM_DESPESA`.
   - **Commit:**
 

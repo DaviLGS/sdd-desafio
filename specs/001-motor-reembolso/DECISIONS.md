@@ -10,6 +10,28 @@ Ordem cronológica inversa: a mais recente primeiro.
 
 ---
 
+## D-004 — Vários estornos no mesmo dia e categoria · `2026-10-14`
+
+**Gatilho:** preparação da T-016. A RN-011 comparava **um** estorno com a soma das despesas do
+dia, mas não dizia o que fazer com dois estornos que, juntos, excedem as despesas (ex.: táxi de
+50 + −45 + −45: cada um cabe, juntos deixariam o dia negativo). Levado ao responsável antes do código.
+
+**O que mudou na spec (1.3 → 1.4):**
+- RN-011: os estornos do mesmo dia e categoria são avaliados pela **soma**; se a soma excede as
+  despesas aprovadas, **todos** os estornos daquele dia e categoria vão para revisão.
+- RN-011: dois exemplos novos no aceite. AMB-019: decisão complementada. Seção 7: caso novo.
+
+**Por quê:** simples e conservador — nunca produz grupo negativo, e não depende da ordem das
+despesas no arquivo (a alternativa "um por vez, em ordem" dependeria).
+
+**O que isso invalidou:** nada (nenhum código de estorno existia ainda).
+
+**Tasks afetadas:** T-016 (aceite ampliado).
+
+**Custo:** 3 arquivos de documentação; poucos minutos.
+
+---
+
 ## D-003 — Motivo da ampliação quando viagem e fim de semana coincidem · `2026-10-14`
 
 **Gatilho:** preparação da T-013. A RN-008 já dizia que as ampliações não acumulam, mas o campo

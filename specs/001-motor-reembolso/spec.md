@@ -1,6 +1,6 @@
 # Spec — Motor de Cálculo de Reembolso
 
-**Versão:** 1.3 · **Status:** rascunho · **Última alteração:** 2026-10-14
+**Versão:** 1.4 · **Status:** rascunho · **Última alteração:** 2026-10-14
 
 > **Regra de ouro deste arquivo:** ele descreve o QUÊ e o PORQUÊ. Nenhuma linha
 > aqui pode citar linguagem, biblioteca, classe, função ou estrutura de pasta.
@@ -202,11 +202,13 @@ Valores negativos são arredondados pelo valor absoluto, mantendo o sinal.
 - Despesa de 15/04 → `em_revisao`, `FORA_DO_PERIODO`.
 
 ### RN-011 — Estorno (valor negativo)
-**Regra:** uma despesa com valor negativo é um estorno. Em alimentação e transporte urbano, ele abate do grupo da mesma categoria no mesmo dia (RN-004), entrando na soma do grupo antes da aplicação do limite. Estorno de hospedagem vai sempre para revisão (`ESTORNO_SEM_DESPESA`), pois hospedagem não é agrupada por dia. Se no mesmo dia e categoria não houver despesas aprovadas cuja soma seja maior ou igual ao valor absoluto do estorno, o estorno fica `em_revisao` com motivo `ESTORNO_SEM_DESPESA` e não entra em nenhum grupo.
+**Regra:** uma despesa com valor negativo é um estorno. Em alimentação e transporte urbano, ele abate do grupo da mesma categoria no mesmo dia (RN-004), entrando na soma do grupo antes da aplicação do limite. Estorno de hospedagem vai sempre para revisão (`ESTORNO_SEM_DESPESA`), pois hospedagem não é agrupada por dia. Os estornos de um mesmo dia e categoria são avaliados **em conjunto**: se a soma das despesas aprovadas (não negativas) desse dia e categoria for menor que o valor absoluto da **soma dos estornos**, **todos** os estornos daquele dia e categoria ficam `em_revisao` com motivo `ESTORNO_SEM_DESPESA` e não entram em nenhum grupo.
 **Origem:** dados de entrada; a política não trata estornos (AMB-019)
 **Aceite:**
 - Transporte de R$ 100,00 com NF + estorno de −R$ 45,00 no mesmo dia → `valor_total` 55,00, reembolsa 55,00.
 - Estorno de −R$ 45,00 sozinho no dia → `em_revisao`, `ESTORNO_SEM_DESPESA`.
+- Táxi de R$ 50,00 + estornos de −R$ 45,00 e −R$ 45,00 no mesmo dia → os dois estornos ficam `em_revisao`, `ESTORNO_SEM_DESPESA`; o grupo tem só o táxi (reembolsa 50,00).
+- Táxi de R$ 100,00 (NF) + estornos de −R$ 30,00 e −R$ 20,00 → `valor_total` 50,00, reembolsa 50,00.
 
 ### RN-012 — Status da despesa
 **Regra:**
@@ -357,7 +359,7 @@ Uma despesa pode ter vários motivos e a saída lista todos. Se um dos motivos l
 #### AMB-019 — Estornos (valores negativos)
 **Texto original do RH:** — (a política não trata estornos; d-009 = −45,00)
 **O que não está claro:** se o estorno é ignorado, abatido do dia, abatido do período ou rejeitado.
-**Decisão:** abate do grupo da mesma categoria e dia; sem despesa a abater, vai para revisão.
+**Decisão:** abate do grupo da mesma categoria e dia; sem despesa a abater, vai para revisão. Vários estornos no mesmo dia e categoria são avaliados pela soma: se juntos excedem as despesas, todos vão para revisão.
 **Justificativa:** o estorno anula um gasto daquele dia; sem o gasto correspondente, não há como saber a qual despesa ele se refere.
 **Regra afetada:** RN-011
 
@@ -384,6 +386,7 @@ Uma despesa pode ter vários motivos e a saída lista todos. Se um dos motivos l
 | Último dia do período | data = `periodo.fim` | Dentro do período | RN-010 |
 | Estorno sem despesa no dia | transporte −45,00 sozinho | `em_revisao`, `ESTORNO_SEM_DESPESA` | RN-011 |
 | Estorno com despesa no dia | transporte 100,00 (NF) + −45,00 | Total 55,00, reembolso 55,00 | RN-011 |
+| Dois estornos que juntos excedem o dia | transporte 50,00 + −45,00 + −45,00 | Os dois estornos `em_revisao`; reembolso 50,00 | RN-011 |
 | Hospedagem com várias noites | 480,00, "2 diarias", com NF | Limite 500,00, reembolso 480,00 | RN-005 |
 | Hospedagem sem número de noites | 300,00, "Hotel centro", com NF | `em_revisao`, `NOITES_NAO_IDENTIFICADAS` | RN-005 |
 | Noites sem espaço | "Hotel 2diarias" | 2 noites | RN-005 |
