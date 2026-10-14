@@ -162,9 +162,9 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 - [x] **T-018** — Justificativa textual de cada despesa.
   - **Atende:** spec seção 4 (`justificativa`)
   - **Aceite:** `JustificativaTest` passa: cada motivo gera seu texto fixo; despesa aprovada cita o grupo (`2026-07-03/alimentacao`); vários motivos aparecem todos.
-  - **Commit:**
+  - **Commit:** `047a6fc`
 
-- [ ] **T-019** — Escrita da saída JSON no schema da spec.
+- [x] **T-019** — Escrita da saída JSON no schema da spec.
   - **Atende:** spec seção 4 (saída), AMB-002
   - **Aceite:** `EscritorSaidaTest` passa:
     - o exemplo da seção 4 da spec é reproduzido campo a campo;
