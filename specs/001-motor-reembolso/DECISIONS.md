@@ -10,6 +10,35 @@ Ordem cronológica inversa: a mais recente primeiro.
 
 ---
 
+## D-005 — Estorno que já tem outro motivo também recebe ESTORNO_SEM_DESPESA · `2026-10-14`
+
+**Gatilho:** T-021 (bateria dos casos de borda da seção 7). O caso "Estorno de hospedagem"
+(hospedagem −100,00, `ESTORNO_SEM_DESPESA`) **falhou**: com a descrição "Estorno hotel" (sem número
+de noites), o código já mandava o estorno para revisão por `NOITES_NAO_IDENTIFICADAS` no passo 2,
+e o passo 5 só avaliava estornos ainda aprovados — o motivo `ESTORNO_SEM_DESPESA` nunca era
+acrescentado. A spec dizia "estorno de hospedagem vai **sempre** para revisão
+(`ESTORNO_SEM_DESPESA`)" e "a saída lista **todos** os motivos" (RN-012). Spec e código divergiam;
+a decisão foi levada ao responsável.
+
+**O que mudou na spec (1.4 → 1.5):**
+- RN-011: só estorno aprovado pode ser abatido; estorno já em revisão ou recusado por outro
+  motivo também recebe `ESTORNO_SEM_DESPESA`. Exemplo novo no aceite.
+- Seção 8, passo 5: esclarecido.
+- Seção 7: caso novo "Estorno já em revisão por outro motivo".
+
+**Por quê:** a RN-012 manda listar todos os motivos; o revisor humano precisa ver de uma vez tudo
+o que impede o reembolso. O status final não muda (continua `em_revisao` ou `recusada`).
+
+**O que isso invalidou:** o comportamento de `Estornos.aplicar` (T-016), que ignorava estornos já
+em revisão. Nenhum teste existente quebra: o resultado do exemplo (seção 9) não muda — d-009 é o
+único estorno do exemplo e já estava aprovado ao chegar no passo 5.
+
+**Tasks afetadas:** T-016 (código corrigido; teste novo em `Rn011EstornoTest`) e T-021.
+
+**Custo:** 2 arquivos de código + 2 de teste + 3 de documentação.
+
+---
+
 ## D-004 — Vários estornos no mesmo dia e categoria · `2026-10-14`
 
 **Gatilho:** preparação da T-016. A RN-011 comparava **um** estorno com a soma das despesas do

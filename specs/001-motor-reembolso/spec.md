@@ -1,6 +1,6 @@
 # Spec — Motor de Cálculo de Reembolso
 
-**Versão:** 1.4 · **Status:** rascunho · **Última alteração:** 2026-10-14
+**Versão:** 1.5 · **Status:** rascunho · **Última alteração:** 2026-10-14
 
 > **Regra de ouro deste arquivo:** ele descreve o QUÊ e o PORQUÊ. Nenhuma linha
 > aqui pode citar linguagem, biblioteca, classe, função ou estrutura de pasta.
@@ -209,6 +209,9 @@ Valores negativos são arredondados pelo valor absoluto, mantendo o sinal.
 - Estorno de −R$ 45,00 sozinho no dia → `em_revisao`, `ESTORNO_SEM_DESPESA`.
 - Táxi de R$ 50,00 + estornos de −R$ 45,00 e −R$ 45,00 no mesmo dia → os dois estornos ficam `em_revisao`, `ESTORNO_SEM_DESPESA`; o grupo tem só o táxi (reembolsa 50,00).
 - Táxi de R$ 100,00 (NF) + estornos de −R$ 30,00 e −R$ 20,00 → `valor_total` 50,00, reembolsa 50,00.
+- Estorno de transporte de −R$ 45,00 com data fora do período → `em_revisao`, motivos `FORA_DO_PERIODO` e `ESTORNO_SEM_DESPESA`.
+
+**Estorno que já tem outro motivo:** só um estorno **aprovado** pelas demais verificações pode ser abatido. Um estorno que já está em revisão ou recusado por outro motivo também recebe `ESTORNO_SEM_DESPESA`, porque não será abatido de nenhum grupo; a saída lista os dois motivos (RN-012).
 
 ### RN-012 — Status da despesa
 **Regra:**
@@ -395,6 +398,7 @@ Uma despesa pode ter vários motivos e a saída lista todos. Se um dos motivos l
 | Categoria em maiúsculas | `ALIMENTACAO` | Tratada como `alimentacao` | RN-001 |
 | Categoria com acento | `alimentação` | Tratada como `alimentacao` | RN-001 |
 | Estorno de hospedagem | hospedagem −100,00 | `em_revisao`, `ESTORNO_SEM_DESPESA` | RN-011 |
+| Estorno já em revisão por outro motivo | transporte −45,00 com data 15/04, período em julho | `em_revisao`, `FORA_DO_PERIODO` e `ESTORNO_SEM_DESPESA` | RN-011, RN-012 |
 | Dia de viagem | alimentação 85,00 em noite de hospedagem | Limite 90,00, reembolso 85,00 | RN-007 |
 | Dia de saída da hospedagem | alimentação 85,00 no dia seguinte à última noite | Limite 60,00, reembolso 60,00 | RN-007 |
 | Sábado | alimentação 85,00 | Limite 90,00, reembolso 85,00 | RN-008 |
@@ -407,7 +411,7 @@ Uma despesa pode ter vários motivos e a saída lista todos. Se um dos motivos l
    categoria (RN-003) · período (RN-010) · duplicata (RN-009) · nota fiscal (RN-006) · noites de hospedagem (RN-005).
 3. **Status** de cada despesa (RN-012). Despesas `em_revisao` e `recusadas` saem do cálculo e **não consomem limite**.
 4. **Dias de viagem** (RN-007), a partir das hospedagens com número de noites identificável, mesmo as que estão em revisão.
-5. **Estornos** (RN-011): abatidos dos grupos, ou enviados para revisão.
+5. **Estornos** (RN-011): abatidos dos grupos, ou enviados para revisão. Estornos que já têm outro motivo também recebem `ESTORNO_SEM_DESPESA`.
 6. **Grupos e limites** (RN-004, RN-005, RN-008): soma das despesas aprovadas, limite (base ou ampliado), reembolso = menor valor entre os dois.
 7. **Resumo**: soma dos reembolsos dos grupos.
 
