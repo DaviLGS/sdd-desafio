@@ -216,9 +216,9 @@ seção 7 que ainda não têm teste — exatamente o papel dele. Não foi deslig
 - [x] **T-024** — Leitura e validação do arquivo de política (`io.LeitorPolitica` → `TabelaPoliticas`).
   - **Atende:** seção 4 (arquivo de política), AMB-028, AMB-029
   - **Aceite:** `LeitorPoliticaTest` passa: lê `politica-v4.json` (padrão + 3 CCs, piso 100, percentual 50); `vigencia` ignorada; rejeita arquivo ausente, sem `padrao`, `limite` negativo ou não numérico, `periodicidade` desconhecida.
-  - **Commit:**
+  - **Commit:** `c09c8c8`
 
-- [ ] **T-025** — Seleção da tabela por centro de custo (`regras.SelecaoTabela`).
+- [x] **T-025** — Seleção da tabela por centro de custo (`regras.SelecaoTabela`).
   - **Atende:** RN-013, RN-001 (categorias da política), AMB-021, AMB-022, AMB-025
   - **Aceite:** `Rn013TabelaCentroCustoTest` passa: `CC-COMERCIAL` → tabela própria; `CC-SUPORTE-N2` → `padrao`; `CC-ADM` sem hospedagem → hospedagem não elegível; `" CC-COMERCIAL "` → `CC-COMERCIAL`; `cc-comercial` → `padrao`; `representacao` só no `CC-COMERCIAL`.
   - **Commit:**
