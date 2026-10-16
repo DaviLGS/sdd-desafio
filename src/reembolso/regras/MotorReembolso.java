@@ -48,7 +48,7 @@ public final class MotorReembolso {
         Set<LocalDate> diasViagem = DiasViagem.calcular(despesas);
 
         // Passo 5: estornos (RN-011). Com o status final definido, cada despesa ganha sua justificativa.
-        resultados = Estornos.aplicar(resultados).stream()
+        resultados = Estornos.aplicar(resultados, politica).stream()
                 .map(r -> new ResultadoDespesa(r.despesa(), r.status(), r.motivos(), Justificativa.para(r, politica)))
                 .toList();
 

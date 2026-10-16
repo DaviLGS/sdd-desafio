@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import reembolso.dominio.Despesa;
 import reembolso.dominio.Motivo;
+import reembolso.dominio.Periodicidade;
 import reembolso.dominio.ResultadoDespesa;
 import reembolso.dominio.Status;
 
@@ -29,7 +30,7 @@ public final class Estornos {
     }
 
     /** Devolve os resultados na mesma ordem, com os estornos não abatíveis movidos para revisão. */
-    public static List<ResultadoDespesa> aplicar(List<ResultadoDespesa> resultados) {
+    public static List<ResultadoDespesa> aplicar(List<ResultadoDespesa> resultados, Politica politica) {
         Map<ChaveDia, BigDecimal> despesasPorDia = new HashMap<>();
         Map<ChaveDia, BigDecimal> estornosPorDia = new HashMap<>();
         for (ResultadoDespesa resultado : resultados) {
@@ -49,8 +50,9 @@ public final class Estornos {
         Set<ChaveDia> diasSemSaldo = new HashSet<>();
         estornosPorDia.forEach((chave, totalEstornado) -> {
             BigDecimal totalDespesas = despesasPorDia.getOrDefault(chave, BigDecimal.ZERO);
-            boolean hospedagem = Politica.HOSPEDAGEM.equals(chave.categoria());
-            if (hospedagem || totalDespesas.compareTo(totalEstornado) < 0) {
+            // Só categorias por dia têm grupo para abater; hospedagem (por noite) vai sempre para revisão.
+            boolean porDia = politica.periodicidade(chave.categoria()).orElse(null) == Periodicidade.DIA;
+            if (!porDia || totalDespesas.compareTo(totalEstornado) < 0) {
                 diasSemSaldo.add(chave);
             }
         });

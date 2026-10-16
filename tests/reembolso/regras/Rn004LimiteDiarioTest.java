@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import reembolso.Politicas;
 import reembolso.dominio.Ampliacao;
 import reembolso.dominio.Despesa;
 import reembolso.dominio.Grupo;
@@ -32,7 +33,7 @@ class Rn004LimiteDiarioTest {
     }
 
     private static List<Grupo> agrupar(ResultadoDespesa... resultados) {
-        return LimiteDiario.agrupar(List.of(resultados), SEM_VIAGEM, Politica.V3);
+        return LimiteDiario.agrupar(List.of(resultados), SEM_VIAGEM, Politicas.PADRAO);
     }
 
     private static BigDecimal valor(String valor) {
@@ -166,7 +167,7 @@ class Rn004LimiteDiarioTest {
     void dia_de_viagem_usa_limite_ampliado() {
         var d011 = despesa("d-011", "2026-07-15", "alimentacao", "85.00", true);
 
-        Grupo grupo = LimiteDiario.agrupar(List.of(aprovada(d011)), Set.of(LocalDate.parse("2026-07-15")), Politica.V3)
+        Grupo grupo = LimiteDiario.agrupar(List.of(aprovada(d011)), Set.of(LocalDate.parse("2026-07-15")), Politicas.PADRAO)
                 .get(0);
 
         assertEquals(Ampliacao.VIAGEM, grupo.ampliacao());
@@ -186,5 +187,28 @@ class Rn004LimiteDiarioTest {
         assertEquals(List.of("d-3"), grupos.get(0).idsDespesas());
         assertEquals(List.of("d-2"), grupos.get(1).idsDespesas());
         assertEquals(List.of("d-1"), grupos.get(2).idsDespesas());
+    }
+
+
+    @Test
+    @DisplayName("RN-004 / AMB-026: representação no CC-COMERCIAL (periodicidade dia) forma grupo diário — 340 → 300")
+    void representacao_forma_grupo_diario() {
+        var jantar = despesa("e-001", "2026-07-13", "representacao", "340.00", true);
+
+        Grupo grupo = LimiteDiario.agrupar(List.of(aprovada(jantar)), SEM_VIAGEM, Politicas.COMERCIAL).get(0);
+
+        assertEquals("representacao", grupo.categoria());
+        assertEquals(valor("300.00"), grupo.limite());
+        assertEquals(valor("300.00"), grupo.valorReembolsado());
+    }
+
+    @Test
+    @DisplayName("RN-004: o limite diário vem da tabela aplicada (CC-COMERCIAL: alimentação 95 → 90)")
+    void limite_da_tabela_aplicada() {
+        var almoco = despesa("d-1", "2026-07-06", "alimentacao", "95.00", true);
+
+        Grupo grupo = LimiteDiario.agrupar(List.of(aprovada(almoco)), SEM_VIAGEM, Politicas.COMERCIAL).get(0);
+
+        assertEquals(valor("90.00"), grupo.valorReembolsado());
     }
 }

@@ -2,61 +2,96 @@ package reembolso.regras;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Set;
+import java.util.Map;
+import java.util.Optional;
 import reembolso.dominio.Ampliacao;
+import reembolso.dominio.LimiteCategoria;
+import reembolso.dominio.Periodicidade;
 
 /**
- * Valores da política de reembolso. Único lugar do código onde eles existem (plano, seção 4).
+ * A tabela de limites aplicada a um colaborador, já resolvida (RN-013) e com as categorias
+ * normalizadas (RN-001). Os valores vêm do arquivo de política (plano, seção 4).
  *
- * @param limiteAlimentacaoDia  limite diário base de alimentação (RN-004)
- * @param limiteTransporteDia   limite diário base de transporte urbano (RN-004)
- * @param limiteHospedagemNoite limite por noite de hospedagem (RN-005)
- * @param fatorAmpliacao        multiplicador do limite ampliado (RN-007, RN-008)
- * @param pisoNotaFiscal        valor a partir do qual a NF é obrigatória, inclusive (RN-006)
- * @param categoriasElegiveis   categorias reembolsáveis, já normalizadas (RN-003)
+ * @param nomeTabela          centro de custo da tabela usada, ou {@code "padrao"}
+ * @param categorias          categoria normalizada → limite e periodicidade
+ * @param pisoNotaFiscal      valor a partir do qual a NF é obrigatória, inclusive (RN-006)
+ * @param percentualAcrescimo percentual de ampliação dos limites por dia (RN-007, RN-008)
  */
 public record Politica(
-        BigDecimal limiteAlimentacaoDia,
-        BigDecimal limiteTransporteDia,
-        BigDecimal limiteHospedagemNoite,
-        BigDecimal fatorAmpliacao,
+        String nomeTabela,
+        Map<String, LimiteCategoria> categorias,
         BigDecimal pisoNotaFiscal,
-        Set<String> categoriasElegiveis) {
+        BigDecimal percentualAcrescimo) {
 
     public static final String ALIMENTACAO = "alimentacao";
     public static final String TRANSPORTE_URBANO = "transporte_urbano";
     public static final String HOSPEDAGEM = "hospedagem";
 
-    /** Política de Reembolso de Despesas — v3, conforme interpretada na spec 1.1. */
+    /**
+     * Política v3, montada no formato da v4. Usada só pela CLI até a T-031, que passa a ler a
+     * política do arquivo; será removida nessa task.
+     */
+    @Deprecated
     public static final Politica V3 = new Politica(
-            new BigDecimal("60.00"),
-            new BigDecimal("80.00"),
-            new BigDecimal("250.00"),
-            new BigDecimal("1.5"),
+            "padrao",
+            Map.of(
+                    ALIMENTACAO, new LimiteCategoria(new BigDecimal("60.00"), Periodicidade.DIA),
+                    TRANSPORTE_URBANO, new LimiteCategoria(new BigDecimal("80.00"), Periodicidade.DIA),
+                    HOSPEDAGEM, new LimiteCategoria(new BigDecimal("250.00"), Periodicidade.DIARIA)),
             new BigDecimal("100.00"),
-            Set.of(ALIMENTACAO, TRANSPORTE_URBANO, HOSPEDAGEM));
+            new BigDecimal("50"));
+
+    private static final BigDecimal CEM = new BigDecimal("100");
 
     public Politica {
-        categoriasElegiveis = Set.copyOf(categoriasElegiveis);
+        categorias = Map.copyOf(categorias);
+    }
+
+    /** RN-003: a categoria está na tabela com limite maior que zero (AMB-023). */
+    public boolean elegivel(String categoria) {
+        LimiteCategoria limite = categorias.get(categoria);
+        return limite != null && limite.limite().signum() > 0;
+    }
+
+    /** Periodicidade da categoria na tabela, se ela existir. */
+    public Optional<Periodicidade> periodicidade(String categoria) {
+        return Optional.ofNullable(categorias.get(categoria)).map(LimiteCategoria::periodicidade);
+    }
+
+    /** Multiplicador do limite ampliado: 1 + percentual / 100. */
+    public BigDecimal fatorAmpliacao() {
+        return BigDecimal.ONE.add(percentualAcrescimo.divide(CEM));
     }
 
     /**
-     * Limite diário de alimentação ou transporte urbano, base ou ampliado (RN-004, RN-007, RN-008).
+     * Limite diário de uma categoria de periodicidade {@code dia}, base ou ampliado (RN-004,
+     * RN-007, RN-008).
      *
-     * @throws IllegalArgumentException para hospedagem (limite por noite, RN-005) ou outra categoria
+     * @throws IllegalArgumentException se a categoria não tem periodicidade {@code dia}
      */
     public BigDecimal limiteDiario(String categoria, Ampliacao ampliacao) {
-        BigDecimal base = switch (categoria) {
-            case ALIMENTACAO -> limiteAlimentacaoDia;
-            case TRANSPORTE_URBANO -> limiteTransporteDia;
-            default -> throw new IllegalArgumentException("categoria sem limite diário: " + categoria);
-        };
-        BigDecimal limite = ampliacao == Ampliacao.NENHUM ? base : base.multiply(fatorAmpliacao);
+        BigDecimal base = limite(categoria, Periodicidade.DIA);
+        BigDecimal limite = ampliacao == Ampliacao.NENHUM ? base : base.multiply(fatorAmpliacao());
         return limite.setScale(2, RoundingMode.HALF_UP);
     }
 
-    /** Limite de uma hospedagem: limite por noite × noites, nunca ampliado (RN-005). */
-    public BigDecimal limiteHospedagem(int noites) {
-        return limiteHospedagemNoite.multiply(BigDecimal.valueOf(noites)).setScale(2, RoundingMode.HALF_UP);
+    /**
+     * Limite de uma categoria de periodicidade {@code diaria}: limite × noites, nunca ampliado
+     * (RN-005).
+     *
+     * @throws IllegalArgumentException se a categoria não tem periodicidade {@code diaria}
+     */
+    public BigDecimal limitePorNoite(String categoria, int noites) {
+        return limite(categoria, Periodicidade.DIARIA).multiply(BigDecimal.valueOf(noites))
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal limite(String categoria, Periodicidade esperada) {
+        LimiteCategoria limite = categorias.get(categoria);
+        if (limite == null || limite.periodicidade() != esperada) {
+            throw new IllegalArgumentException(
+                    "categoria sem limite de periodicidade " + esperada.codigo() + ": " + categoria);
+        }
+        return limite.limite();
     }
 }

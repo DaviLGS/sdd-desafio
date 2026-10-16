@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import reembolso.Politicas;
 import reembolso.dominio.Ampliacao;
 import reembolso.dominio.Despesa;
 
@@ -30,7 +31,7 @@ class Rn008FimDeSemanaPlantaoTest {
         Ampliacao ampliacao = ampliacao(d012, SEM_VIAGEM);
 
         assertEquals(Ampliacao.FIM_DE_SEMANA_OU_PLANTAO, ampliacao);
-        assertEquals(new BigDecimal("90.00"), Politica.V3.limiteDiario("alimentacao", ampliacao));
+        assertEquals(new BigDecimal("90.00"), Politicas.PADRAO.limiteDiario("alimentacao", ampliacao));
     }
 
     @Test
@@ -75,7 +76,7 @@ class Rn008FimDeSemanaPlantaoTest {
         Ampliacao ampliacao = ampliacao(almoco, Set.of(LocalDate.parse("2026-07-18")));
 
         assertEquals(Ampliacao.VIAGEM, ampliacao);
-        assertEquals(new BigDecimal("90.00"), Politica.V3.limiteDiario("alimentacao", ampliacao));
+        assertEquals(new BigDecimal("90.00"), Politicas.PADRAO.limiteDiario("alimentacao", ampliacao));
     }
 
     @Test
@@ -86,7 +87,7 @@ class Rn008FimDeSemanaPlantaoTest {
         Ampliacao ampliacao = ampliacao(d011, Set.of(LocalDate.parse("2026-07-14"), LocalDate.parse("2026-07-15")));
 
         assertEquals(Ampliacao.VIAGEM, ampliacao);
-        assertEquals(new BigDecimal("90.00"), Politica.V3.limiteDiario("alimentacao", ampliacao));
+        assertEquals(new BigDecimal("90.00"), Politicas.PADRAO.limiteDiario("alimentacao", ampliacao));
     }
 
     @Test
@@ -97,7 +98,7 @@ class Rn008FimDeSemanaPlantaoTest {
         Ampliacao ampliacao = ampliacao(almoco, SEM_VIAGEM);
 
         assertEquals(Ampliacao.NENHUM, ampliacao);
-        assertEquals(new BigDecimal("60.00"), Politica.V3.limiteDiario("alimentacao", ampliacao));
+        assertEquals(new BigDecimal("60.00"), Politicas.PADRAO.limiteDiario("alimentacao", ampliacao));
     }
 
     @Test
@@ -107,13 +108,13 @@ class Rn008FimDeSemanaPlantaoTest {
 
         Ampliacao ampliacao = ampliacao(taxi, SEM_VIAGEM);
 
-        assertEquals(new BigDecimal("120.00"), Politica.V3.limiteDiario("transporte_urbano", ampliacao));
+        assertEquals(new BigDecimal("120.00"), Politicas.PADRAO.limiteDiario("transporte_urbano", ampliacao));
     }
 
     @Test
     @DisplayName("RN-004: transporte urbano em dia útil sem ampliação → limite 80,00")
     void transporte_dia_util() {
-        assertEquals(new BigDecimal("80.00"), Politica.V3.limiteDiario("transporte_urbano", Ampliacao.NENHUM));
+        assertEquals(new BigDecimal("80.00"), Politicas.PADRAO.limiteDiario("transporte_urbano", Ampliacao.NENHUM));
     }
 
     @Test
@@ -127,6 +128,6 @@ class Rn008FimDeSemanaPlantaoTest {
     @Test
     @DisplayName("RN-005: hospedagem não tem limite diário (é por noite)")
     void hospedagem_sem_limite_diario() {
-        assertThrows(IllegalArgumentException.class, () -> Politica.V3.limiteDiario("hospedagem", Ampliacao.NENHUM));
+        assertThrows(IllegalArgumentException.class, () -> Politicas.PADRAO.limiteDiario("hospedagem", Ampliacao.NENHUM));
     }
 }

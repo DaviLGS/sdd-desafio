@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import reembolso.Politicas;
 import reembolso.dominio.Ampliacao;
 import reembolso.dominio.Entrada;
 import reembolso.dominio.Grupo;
@@ -30,7 +31,7 @@ class MotorReembolsoExemploTest {
     @BeforeAll
     static void calcular() throws Exception {
         entrada = new LeitorEntrada().lerArquivo(Path.of("exemplos", "despesas-exemplo.json"));
-        resultado = new MotorReembolso(Politica.V3).calcular(entrada);
+        resultado = new MotorReembolso(Politicas.PADRAO).calcular(entrada);
     }
 
     private static ResultadoDespesa despesa(String id) {
@@ -125,7 +126,7 @@ class MotorReembolsoExemploTest {
     @Test
     @DisplayName("Seção 9: duas execuções com a mesma entrada produzem exatamente o mesmo resultado")
     void deterministico() {
-        Resultado outra = new MotorReembolso(Politica.V3).calcular(entrada);
+        Resultado outra = new MotorReembolso(Politicas.PADRAO).calcular(entrada);
 
         assertEquals(resultado, outra);
     }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import reembolso.Politicas;
 import reembolso.dominio.Despesa;
 import reembolso.dominio.Grupo;
 import reembolso.dominio.Motivo;
@@ -16,6 +17,10 @@ import reembolso.dominio.Status;
 
 /** T-016: RN-011 / AMB-019 / D-004 — estornos abatem do grupo do dia ou vão para revisão. */
 class Rn011EstornoTest {
+
+    private static List<ResultadoDespesa> aplicar(List<ResultadoDespesa> resultados) {
+        return Estornos.aplicar(resultados, Politicas.PADRAO);
+    }
 
     private static ResultadoDespesa aprovada(Despesa despesa) {
         return new ResultadoDespesa(despesa, Status.APROVADA, List.of(), "");
@@ -26,7 +31,7 @@ class Rn011EstornoTest {
     }
 
     private static List<Grupo> grupos(List<ResultadoDespesa> resultados) {
-        return LimiteDiario.agrupar(resultados, Set.of(), Politica.V3);
+        return LimiteDiario.agrupar(resultados, Set.of(), Politicas.PADRAO);
     }
 
     @Test
@@ -35,7 +40,7 @@ class Rn011EstornoTest {
         var taxi = despesa("d-1", "2026-07-06", "transporte_urbano", "100.00", true);
         var estorno = despesa("d-2", "2026-07-06", "transporte_urbano", "-45.00", false);
 
-        List<ResultadoDespesa> resultados = Estornos.aplicar(List.of(aprovada(taxi), aprovada(estorno)));
+        List<ResultadoDespesa> resultados = aplicar(List.of(aprovada(taxi), aprovada(estorno)));
 
         assertEquals(Status.APROVADA, resultadoDe(resultados, "d-2").status());
         Grupo grupo = grupos(resultados).get(0);
@@ -49,7 +54,7 @@ class Rn011EstornoTest {
     void estorno_sozinho_vai_para_revisao() {
         var d009 = despesa("d-009", "2026-07-11", "transporte_urbano", "-45.00", false);
 
-        List<ResultadoDespesa> resultados = Estornos.aplicar(List.of(aprovada(d009)));
+        List<ResultadoDespesa> resultados = aplicar(List.of(aprovada(d009)));
 
         ResultadoDespesa resultado = resultados.get(0);
         assertEquals(Status.EM_REVISAO, resultado.status());
@@ -63,7 +68,7 @@ class Rn011EstornoTest {
         var taxi = despesa("d-1", "2026-07-06", "transporte_urbano", "30.00", true);
         var estorno = despesa("d-2", "2026-07-06", "transporte_urbano", "-45.00", false);
 
-        List<ResultadoDespesa> resultados = Estornos.aplicar(List.of(aprovada(taxi), aprovada(estorno)));
+        List<ResultadoDespesa> resultados = aplicar(List.of(aprovada(taxi), aprovada(estorno)));
 
         assertEquals(Status.EM_REVISAO, resultadoDe(resultados, "d-2").status());
         Grupo grupo = grupos(resultados).get(0);
@@ -77,7 +82,7 @@ class Rn011EstornoTest {
         var taxi = despesa("d-1", "2026-07-06", "transporte_urbano", "45.00", true);
         var estorno = despesa("d-2", "2026-07-06", "transporte_urbano", "-45.00", false);
 
-        List<ResultadoDespesa> resultados = Estornos.aplicar(List.of(aprovada(taxi), aprovada(estorno)));
+        List<ResultadoDespesa> resultados = aplicar(List.of(aprovada(taxi), aprovada(estorno)));
 
         assertEquals(Status.APROVADA, resultadoDe(resultados, "d-2").status());
         assertEquals(new BigDecimal("0.00"), grupos(resultados).get(0).valorReembolsado());
@@ -91,7 +96,7 @@ class Rn011EstornoTest {
         var estorno2 = despesa("d-3", "2026-07-06", "transporte_urbano", "-45.00", false, "Outro estorno");
 
         List<ResultadoDespesa> resultados =
-                Estornos.aplicar(List.of(aprovada(taxi), aprovada(estorno1), aprovada(estorno2)));
+                aplicar(List.of(aprovada(taxi), aprovada(estorno1), aprovada(estorno2)));
 
         assertEquals(Status.EM_REVISAO, resultadoDe(resultados, "d-2").status());
         assertEquals(Status.EM_REVISAO, resultadoDe(resultados, "d-3").status());
@@ -106,7 +111,7 @@ class Rn011EstornoTest {
         var estorno2 = despesa("d-3", "2026-07-06", "transporte_urbano", "-20.00", false);
 
         List<ResultadoDespesa> resultados =
-                Estornos.aplicar(List.of(aprovada(taxi), aprovada(estorno1), aprovada(estorno2)));
+                aplicar(List.of(aprovada(taxi), aprovada(estorno1), aprovada(estorno2)));
 
         Grupo grupo = grupos(resultados).get(0);
         assertEquals(new BigDecimal("50.00"), grupo.valorTotal());
@@ -119,7 +124,7 @@ class Rn011EstornoTest {
         var jantar = despesa("d-1", "2026-07-03", "alimentacao", "100.00", true);
         var estorno = despesa("d-2", "2026-07-03", "alimentacao", "-30.00", false);
 
-        Grupo grupo = grupos(Estornos.aplicar(List.of(aprovada(jantar), aprovada(estorno)))).get(0);
+        Grupo grupo = grupos(aplicar(List.of(aprovada(jantar), aprovada(estorno)))).get(0);
 
         assertEquals(new BigDecimal("70.00"), grupo.valorTotal());
         assertEquals(new BigDecimal("60.00"), grupo.valorReembolsado());
@@ -133,7 +138,7 @@ class Rn011EstornoTest {
         var estorno = despesa("d-3", "2026-07-06", "transporte_urbano", "-20.00", false);
 
         List<ResultadoDespesa> resultados =
-                Estornos.aplicar(List.of(aprovada(almoco), aprovada(taxiOutroDia), aprovada(estorno)));
+                aplicar(List.of(aprovada(almoco), aprovada(taxiOutroDia), aprovada(estorno)));
 
         assertEquals(Status.EM_REVISAO, resultadoDe(resultados, "d-3").status());
     }
@@ -144,7 +149,7 @@ class Rn011EstornoTest {
         var hotel = despesa("d-1", "2026-07-14", "hospedagem", "480.00", true, "Hotel 2 noites");
         var estorno = despesa("d-2", "2026-07-14", "hospedagem", "-100.00", false, "Estorno hotel 2 noites");
 
-        List<ResultadoDespesa> resultados = Estornos.aplicar(List.of(aprovada(hotel), aprovada(estorno)));
+        List<ResultadoDespesa> resultados = aplicar(List.of(aprovada(hotel), aprovada(estorno)));
 
         assertEquals(Status.APROVADA, resultadoDe(resultados, "d-1").status());
         assertEquals(Status.EM_REVISAO, resultadoDe(resultados, "d-2").status());
@@ -158,7 +163,7 @@ class Rn011EstornoTest {
         var estorno = despesa("d-2", "2026-07-06", "transporte_urbano", "-45.00", false);
         var taxiEmRevisao = new ResultadoDespesa(taxiSemNf, Status.EM_REVISAO, List.of(Motivo.NF_AUSENTE), "");
 
-        List<ResultadoDespesa> resultados = Estornos.aplicar(List.of(taxiEmRevisao, aprovada(estorno)));
+        List<ResultadoDespesa> resultados = aplicar(List.of(taxiEmRevisao, aprovada(estorno)));
 
         assertEquals(Status.EM_REVISAO, resultadoDe(resultados, "d-2").status());
     }
@@ -169,7 +174,7 @@ class Rn011EstornoTest {
         var estorno = despesa("d-1", "2026-04-15", "transporte_urbano", "-45.00", false);
         var emRevisao = new ResultadoDespesa(estorno, Status.EM_REVISAO, List.of(Motivo.FORA_DO_PERIODO), "");
 
-        ResultadoDespesa resultado = Estornos.aplicar(List.of(emRevisao)).get(0);
+        ResultadoDespesa resultado = aplicar(List.of(emRevisao)).get(0);
 
         assertEquals(Status.EM_REVISAO, resultado.status());
         assertEquals(List.of(Motivo.FORA_DO_PERIODO, Motivo.ESTORNO_SEM_DESPESA), resultado.motivos());
@@ -181,7 +186,7 @@ class Rn011EstornoTest {
         var estorno = despesa("d-1", "2026-07-07", "coworking", "-20.00", false);
         var recusado = new ResultadoDespesa(estorno, Status.RECUSADA, List.of(Motivo.CATEGORIA_FORA_DA_POLITICA), "");
 
-        ResultadoDespesa resultado = Estornos.aplicar(List.of(recusado)).get(0);
+        ResultadoDespesa resultado = aplicar(List.of(recusado)).get(0);
 
         assertEquals(Status.RECUSADA, resultado.status());
         assertEquals(List.of(Motivo.CATEGORIA_FORA_DA_POLITICA, Motivo.ESTORNO_SEM_DESPESA), resultado.motivos());
@@ -193,7 +198,7 @@ class Rn011EstornoTest {
         var taxi = despesa("d-1", "2026-07-06", "transporte_urbano", "100.00", false);
         var emRevisao = new ResultadoDespesa(taxi, Status.EM_REVISAO, List.of(Motivo.NF_AUSENTE), "");
 
-        assertEquals(emRevisao, Estornos.aplicar(List.of(emRevisao)).get(0));
+        assertEquals(emRevisao, aplicar(List.of(emRevisao)).get(0));
     }
 
     @Test
@@ -202,7 +207,7 @@ class Rn011EstornoTest {
         var estorno = despesa("d-1", "2026-07-11", "transporte_urbano", "-45.00", false);
         var almoco = despesa("d-2", "2026-07-03", "alimentacao", "40.00", true);
 
-        List<ResultadoDespesa> resultados = Estornos.aplicar(List.of(aprovada(estorno), aprovada(almoco)));
+        List<ResultadoDespesa> resultados = aplicar(List.of(aprovada(estorno), aprovada(almoco)));
 
         assertEquals(List.of("d-1", "d-2"), resultados.stream().map(r -> r.despesa().id()).toList());
     }

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import reembolso.Politicas;
 import reembolso.dominio.Motivo;
 import reembolso.dominio.Status;
 
@@ -16,7 +17,7 @@ import reembolso.dominio.Status;
 class Rn006NotaFiscalTest {
 
     private static Optional<Motivo> verificar(String categoria, String valor, boolean temNotaFiscal) {
-        return NotaFiscal.verificar(despesa("d-1", "2026-07-06", categoria, valor, temNotaFiscal), Politica.V3);
+        return NotaFiscal.verificar(despesa("d-1", "2026-07-06", categoria, valor, temNotaFiscal), Politicas.PADRAO);
     }
 
     @Test
@@ -55,8 +56,8 @@ class Rn006NotaFiscalTest {
         var taxi1 = despesa("d-1", "2026-07-06", "transporte_urbano", "60.00", false);
         var taxi2 = despesa("d-2", "2026-07-06", "transporte_urbano", "50.00", false);
 
-        assertEquals(Optional.empty(), NotaFiscal.verificar(taxi1, Politica.V3));
-        assertEquals(Optional.empty(), NotaFiscal.verificar(taxi2, Politica.V3));
+        assertEquals(Optional.empty(), NotaFiscal.verificar(taxi1, Politicas.PADRAO));
+        assertEquals(Optional.empty(), NotaFiscal.verificar(taxi2, Politicas.PADRAO));
     }
 
     @Test

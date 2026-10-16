@@ -8,12 +8,14 @@ import java.util.OptionalInt;
 import reembolso.dominio.Ampliacao;
 import reembolso.dominio.Despesa;
 import reembolso.dominio.Grupo;
+import reembolso.dominio.Periodicidade;
 import reembolso.dominio.ResultadoDespesa;
 import reembolso.dominio.Status;
 
 /**
- * RN-005: cada hospedagem aprovada forma o seu próprio grupo, com limite de R$ 250 × noites e sem
- * ampliação. Hospedagens que cobrem o mesmo dia são limitadas isoladamente.
+ * RN-005: cada despesa aprovada de categoria com periodicidade {@code diaria} (hospedagem) forma o seu
+ * próprio grupo, com limite da tabela × noites e sem ampliação. Hospedagens que cobrem o mesmo dia
+ * são limitadas isoladamente.
  */
 public final class LimiteHospedagem {
 
@@ -25,7 +27,8 @@ public final class LimiteHospedagem {
         List<Grupo> grupos = new ArrayList<>();
         for (ResultadoDespesa resultado : resultados) {
             Despesa despesa = resultado.despesa();
-            if (resultado.status() != Status.APROVADA || !Politica.HOSPEDAGEM.equals(despesa.categoria())) {
+            boolean porNoite = politica.periodicidade(despesa.categoria()).orElse(null) == Periodicidade.DIARIA;
+            if (resultado.status() != Status.APROVADA || !porNoite) {
                 continue;
             }
             OptionalInt noites = NoitesHospedagem.identificar(despesa.descricao());
@@ -34,10 +37,10 @@ public final class LimiteHospedagem {
                 throw new IllegalStateException("hospedagem aprovada sem noites identificáveis: " + despesa.id());
             }
             BigDecimal valor = despesa.valor().setScale(2);
-            BigDecimal limite = politica.limiteHospedagem(noites.getAsInt());
+            BigDecimal limite = politica.limitePorNoite(despesa.categoria(), noites.getAsInt());
             grupos.add(new Grupo(
                     despesa.data(),
-                    Politica.HOSPEDAGEM,
+                    despesa.categoria(),
                     List.of(despesa.id()),
                     noites.getAsInt(),
                     valor,

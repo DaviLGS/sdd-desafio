@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import reembolso.Politicas;
 import reembolso.dominio.Ampliacao;
 import reembolso.dominio.Despesa;
 import reembolso.dominio.Grupo;
@@ -25,7 +26,7 @@ class Rn005LimiteHospedagemTest {
     }
 
     private static Grupo unicoGrupo(Despesa despesa) {
-        List<Grupo> grupos = LimiteHospedagem.agrupar(List.of(aprovada(despesa)), Politica.V3);
+        List<Grupo> grupos = LimiteHospedagem.agrupar(List.of(aprovada(despesa)), Politicas.PADRAO);
         assertEquals(1, grupos.size());
         return grupos.get(0);
     }
@@ -80,7 +81,7 @@ class Rn005LimiteHospedagemTest {
         var hotelA = despesa("d-1", "2026-07-14", "hospedagem", "600.00", true, "Hotel A 2 noites");
         var hotelB = despesa("d-2", "2026-07-15", "hospedagem", "600.00", true, "Hotel B 2 noites");
 
-        List<Grupo> grupos = LimiteHospedagem.agrupar(List.of(aprovada(hotelA), aprovada(hotelB)), Politica.V3);
+        List<Grupo> grupos = LimiteHospedagem.agrupar(List.of(aprovada(hotelA), aprovada(hotelB)), Politicas.PADRAO);
 
         assertEquals(2, grupos.size());
         assertEquals(new BigDecimal("500.00"), grupos.get(0).valorReembolsado());
@@ -93,7 +94,7 @@ class Rn005LimiteHospedagemTest {
         var d013 = despesa("d-013", "2026-07-22", "hospedagem", "690.00", false, "Airbnb 3 noites");
         var emRevisao = new ResultadoDespesa(d013, Status.EM_REVISAO, List.of(Motivo.NF_AUSENTE), "");
 
-        assertTrue(LimiteHospedagem.agrupar(List.of(emRevisao), Politica.V3).isEmpty());
+        assertTrue(LimiteHospedagem.agrupar(List.of(emRevisao), Politicas.PADRAO).isEmpty());
     }
 
     @Test
@@ -101,6 +102,6 @@ class Rn005LimiteHospedagemTest {
     void outras_categorias_fora() {
         var almoco = despesa("d-1", "2026-07-14", "alimentacao", "50.00", true, "Almoco 2 noites");
 
-        assertTrue(LimiteHospedagem.agrupar(List.of(aprovada(almoco)), Politica.V3).isEmpty());
+        assertTrue(LimiteHospedagem.agrupar(List.of(aprovada(almoco)), Politicas.PADRAO).isEmpty());
     }
 }

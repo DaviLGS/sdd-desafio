@@ -11,16 +11,16 @@ import java.util.Set;
 import reembolso.dominio.Ampliacao;
 import reembolso.dominio.Despesa;
 import reembolso.dominio.Grupo;
+import reembolso.dominio.Periodicidade;
 import reembolso.dominio.ResultadoDespesa;
 import reembolso.dominio.Status;
 
 /**
- * RN-004: despesas aprovadas de alimentação e de transporte urbano formam um grupo por dia e
- * categoria; o reembolso do grupo é o menor valor entre a soma e o limite do dia.
+ * RN-004: despesas aprovadas de categorias com periodicidade {@code dia} (alimentação, transporte
+ * urbano, representação…) formam um grupo por dia e categoria; o reembolso do grupo é o menor valor
+ * entre a soma e o limite do dia.
  */
 public final class LimiteDiario {
-
-    private static final Set<String> CATEGORIAS = Set.of(Politica.ALIMENTACAO, Politica.TRANSPORTE_URBANO);
 
     private LimiteDiario() {
     }
@@ -36,7 +36,8 @@ public final class LimiteDiario {
         Map<ChaveGrupo, List<Despesa>> porDiaECategoria = new LinkedHashMap<>();
         for (ResultadoDespesa resultado : resultados) {
             Despesa despesa = resultado.despesa();
-            if (resultado.status() != Status.APROVADA || !CATEGORIAS.contains(despesa.categoria())) {
+            boolean porDia = politica.periodicidade(despesa.categoria()).orElse(null) == Periodicidade.DIA;
+            if (resultado.status() != Status.APROVADA || !porDia) {
                 continue;
             }
             porDiaECategoria

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import reembolso.Politicas;
 import reembolso.dominio.Motivo;
 import reembolso.dominio.Resultado;
 import reembolso.dominio.ResultadoDespesa;
@@ -23,7 +24,7 @@ class JustificativaTest {
 
     private static String justificativa(Status status, List<Motivo> motivos) {
         var d = despesa("d-1", "2026-07-03", "alimentacao", "72.50", true);
-        return Justificativa.para(new ResultadoDespesa(d, status, motivos, ""), Politica.V3);
+        return Justificativa.para(new ResultadoDespesa(d, status, motivos, ""), Politicas.PADRAO);
     }
 
     @Test
@@ -60,7 +61,7 @@ class JustificativaTest {
     void cada_motivo_tem_texto_proprio() {
         Set<String> textos = new HashSet<>();
         for (Motivo motivo : EnumSet.allOf(Motivo.class)) {
-            String texto = Justificativa.texto(motivo, Politica.V3);
+            String texto = Justificativa.texto(motivo, Politicas.PADRAO);
             assertFalse(texto.isBlank(), motivo.name());
             assertTrue(texto.matches(".*\\(RN-\\d{3}\\)\\.$"), "deve terminar citando a RN: " + motivo);
             textos.add(texto);
@@ -72,7 +73,7 @@ class JustificativaTest {
     @DisplayName("Seção 4: o motor preenche a justificativa de toda despesa do exemplo")
     void motor_preenche_justificativas() throws Exception {
         var entrada = new LeitorEntrada().lerArquivo(Path.of("exemplos", "despesas-exemplo.json"));
-        Resultado resultado = new MotorReembolso(Politica.V3).calcular(entrada);
+        Resultado resultado = new MotorReembolso(Politicas.PADRAO).calcular(entrada);
 
         for (ResultadoDespesa r : resultado.despesas()) {
             assertFalse(r.justificativa().isBlank(), r.despesa().id());

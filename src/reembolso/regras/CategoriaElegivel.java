@@ -4,7 +4,7 @@ import java.util.Optional;
 import reembolso.dominio.Despesa;
 import reembolso.dominio.Motivo;
 
-/** RN-003: só as categorias da política são reembolsáveis. */
+/** RN-003: só as categorias da tabela aplicada, com limite maior que zero, são reembolsáveis. */
 public final class CategoriaElegivel {
 
     private CategoriaElegivel() {
@@ -12,7 +12,7 @@ public final class CategoriaElegivel {
 
     /** Espera a despesa já normalizada (RN-001). */
     public static Optional<Motivo> verificar(Despesa despesa, Politica politica) {
-        if (politica.categoriasElegiveis().contains(despesa.categoria())) {
+        if (politica.elegivel(despesa.categoria())) {
             return Optional.empty();
         }
         return Optional.of(Motivo.CATEGORIA_FORA_DA_POLITICA);

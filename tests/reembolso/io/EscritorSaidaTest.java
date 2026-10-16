@@ -13,9 +13,9 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import reembolso.Politicas;
 import reembolso.dominio.Resultado;
 import reembolso.regras.MotorReembolso;
-import reembolso.regras.Politica;
 
 /** T-019: escrita da saída JSON no schema da seção 4 da spec. */
 class EscritorSaidaTest {
@@ -62,12 +62,12 @@ class EscritorSaidaTest {
     private final EscritorSaida escritor = new EscritorSaida();
 
     private static Resultado calcular(String json) throws Exception {
-        return new MotorReembolso(Politica.V3).calcular(new LeitorEntrada().lerTexto(json));
+        return new MotorReembolso(Politicas.PADRAO).calcular(new LeitorEntrada().lerTexto(json));
     }
 
     private static Resultado calcularExemplo() throws Exception {
         var entrada = new LeitorEntrada().lerArquivo(Path.of("exemplos", "despesas-exemplo.json"));
-        return new MotorReembolso(Politica.V3).calcular(entrada);
+        return new MotorReembolso(Politicas.PADRAO).calcular(entrada);
     }
 
     @Test

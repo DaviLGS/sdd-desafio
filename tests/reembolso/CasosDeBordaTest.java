@@ -28,7 +28,6 @@ import reembolso.dominio.Resultado;
 import reembolso.dominio.ResultadoDespesa;
 import reembolso.dominio.Status;
 import reembolso.regras.MotorReembolso;
-import reembolso.regras.Politica;
 
 /**
  * T-021: uma verificação por linha da tabela de casos de borda (spec, seção 7), pelo motor completo.
@@ -50,7 +49,7 @@ class CasosDeBordaTest {
 
     private static Resultado calcular(Despesa... despesas) {
         Entrada entrada = new Entrada(new Colaborador("c-1", "Fulana", "CC"), JULHO, List.of(despesas));
-        return new MotorReembolso(Politica.V3).calcular(entrada);
+        return new MotorReembolso(Politicas.PADRAO).calcular(entrada);
     }
 
     private static ResultadoDespesa despesa(Resultado r, String id) {

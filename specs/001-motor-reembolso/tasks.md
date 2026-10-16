@@ -200,11 +200,15 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 
 ## Fase 6 — Envelope do Dia 2: Política v4 (D-006, D-007)
 
-Ponto de partida: `5f7712c`. Spec 2.1, plano 2.0. Ao fim de cada task, **todos** os testes
-passam — os testes da v1 que dependiam de `Politica.V3` ou do total 680,53 são ajustados na
-task que os quebra, e o ajuste é citado no commit.
+Ponto de partida: `5f7712c`. Spec 2.1, plano 2.0. Ao fim de cada task, os testes passam — os
+testes da v1 que dependiam de `Politica.V3` ou do total 680,53 são ajustados na task que os
+quebra, e o ajuste é citado no commit.
 
-- [ ] **T-023** — `Politica` configurável: `LimiteCategoria` e `Periodicidade` no domínio; `Politica` resolvida por tabela (`elegivel`, `periodicidade`, `limiteDiario`, `limitePorNoite`, percentual e piso); remoção de `Politica.V3`; fixture `tests/reembolso/Politicas.java` com a tabela padrão; `LimiteDiario`, `LimiteHospedagem` e `Estornos` agrupam pela `periodicidade`.
+**Exceção justificada:** o teste de rastreabilidade `CasosDeBordaTest.toda_linha_da_secao_7_tem_teste`
+fica **vermelho** desde a spec 2.0 (`149f189`) até a T-032. É ele apontando as 16 linhas novas da
+seção 7 que ainda não têm teste — exatamente o papel dele. Não foi desligado.
+
+- [x] **T-023** — `Politica` configurável: `LimiteCategoria` e `Periodicidade` no domínio; `Politica` resolvida por tabela (`elegivel`, `periodicidade`, `limiteDiario`, `limitePorNoite`, percentual e piso); fixture `tests/reembolso/Politicas.java` (padrão, CC-COMERCIAL, CC-ENG-PLATAFORMA); `LimiteDiario`, `LimiteHospedagem` e `Estornos` agrupam pela `periodicidade`. `Politica.V3` continua só para a CLI, montada no formato novo e marcada `@Deprecated`, e sai na T-031 (a CLI só lê a política do arquivo a partir dela).
   - **Atende:** RN-003, RN-004, RN-005, RN-011 (periodicidade), AMB-023, AMB-026, AMB-027
   - **Aceite:** `PoliticaTest` (reescrito) passa: limite 0 → não elegível; categoria ausente → não elegível; ampliado = base × 1,5; `representacao` de periodicidade `dia` forma grupo diário (`Rn004LimiteDiarioTest`); todos os testes da v1 passam usando a fixture.
   - **Commit:**
@@ -244,7 +248,7 @@ task que os quebra, e o ajuste é citado no commit.
   - **Aceite:** `EscritorSaidaTest` passa: exemplo da seção 4 com `tabela_aplicada`; o trecho de e-004 da seção 4 reproduzido; e-006 com `valor` nulo; despesas em BRL sem campos de câmbio.
   - **Commit:**
 
-- [ ] **T-031** — CLI com `--politica` e `--cambio` obrigatórios.
+- [ ] **T-031** — CLI com `--politica` e `--cambio` obrigatórios; remoção de `Politica.V3`.
   - **Atende:** plano DT-009, AMB-028
   - **Aceite:** `MainCliTest` passa: os três arquivos da seção 9 geram os totais esperados; falta `--politica` ou `--cambio` → código 2; política ou câmbio inválido/inexistente → código 1, sem saída.
   - **Commit:**
