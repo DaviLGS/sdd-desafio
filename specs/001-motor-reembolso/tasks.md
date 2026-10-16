@@ -206,7 +206,7 @@ quebra, e o ajuste é citado no commit.
 
 **Exceção justificada:** o teste de rastreabilidade `CasosDeBordaTest.toda_linha_da_secao_7_tem_teste`
 fica **vermelho** desde a spec 2.0 (`149f189`) até a T-032. É ele apontando as 16 linhas novas da
-seção 7 que ainda não têm teste — exatamente o papel dele. Não foi desligado.
+seção 7 que ainda não têm teste — exatamente o papel dele. Não foi desligado. **Voltou a verde na T-032.**
 
 - [x] **T-023** — `Politica` configurável: `LimiteCategoria` e `Periodicidade` no domínio; `Politica` resolvida por tabela (`elegivel`, `periodicidade`, `limiteDiario`, `limitePorNoite`, percentual e piso); fixture `tests/reembolso/Politicas.java` (padrão, CC-COMERCIAL, CC-ENG-PLATAFORMA); `LimiteDiario`, `LimiteHospedagem` e `Estornos` agrupam pela `periodicidade`. `Politica.V3` continua só para a CLI, montada no formato novo e marcada `@Deprecated`, e sai na T-031 (a CLI só lê a política do arquivo a partir dela).
   - **Atende:** RN-003, RN-004, RN-005, RN-011 (periodicidade), AMB-023, AMB-026, AMB-027
@@ -251,9 +251,9 @@ seção 7 que ainda não têm teste — exatamente o papel dele. Não foi deslig
 - [x] **T-031** — CLI com `--politica` e `--cambio` obrigatórios; remoção de `Politica.V3`.
   - **Atende:** plano DT-009, AMB-028
   - **Aceite:** `MainCliTest` passa: os três arquivos da seção 9 geram os totais esperados; falta `--politica` ou `--cambio` → código 2; política ou câmbio inválido/inexistente → código 1, sem saída.
-  - **Commit:**
+  - **Commit:** `5ed75fd`
 
-- [ ] **T-032** — Casos de borda da v4 (16 linhas novas da seção 7).
+- [x] **T-032** — Casos de borda da v4 (16 linhas novas da seção 7).
   - **Atende:** seção 7 da spec
   - **Aceite:** `CasosDeBordaTest` passa com um teste por linha da seção 7, incluindo as 16 novas; o teste de rastreabilidade contra a spec passa.
   - **Commit:**

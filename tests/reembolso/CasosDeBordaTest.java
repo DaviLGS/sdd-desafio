@@ -1,6 +1,8 @@
 package reembolso;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import reembolso.dominio.Ampliacao;
@@ -27,13 +30,19 @@ import reembolso.dominio.Periodo;
 import reembolso.dominio.Resultado;
 import reembolso.dominio.ResultadoDespesa;
 import reembolso.dominio.Status;
+import reembolso.dominio.TabelaCambio;
+import reembolso.dominio.TabelaPoliticas;
+import reembolso.io.LeitorCambio;
+import reembolso.io.LeitorPolitica;
 import reembolso.regras.MotorReembolso;
 
 /**
- * T-021: uma verificação por linha da tabela de casos de borda (spec, seção 7), pelo motor completo.
+ * T-021 / T-032: uma verificação por linha da tabela de casos de borda (spec, seção 7), pelo motor
+ * completo, com {@code exemplos/envelope/politica-v4.json} e {@code cambio.json}.
  *
  * <p>O {@code @DisplayName} de cada teste é idêntico ao texto da coluna "Caso" da spec, e
- * {@link #toda_linha_da_secao_7_tem_teste()} garante que nenhuma linha fique sem teste.
+ * {@link #toda_linha_da_secao_7_tem_teste()} garante que nenhuma linha fique sem teste. Salvo
+ * indicação, o colaborador é de um centro de custo sem entrada (tabela padrão), como diz a seção 7.
  */
 class CasosDeBordaTest {
 
@@ -41,15 +50,36 @@ class CasosDeBordaTest {
     private static final String DIA_UTIL = "2026-07-06";   // segunda-feira
     private static final String SABADO = "2026-07-18";
 
-    /** Despesa crua, como sai do leitor: o motor normaliza e arredonda (passo 1 da seção 8). */
+    private static TabelaPoliticas politica;
+    private static TabelaCambio cambio;
+
+    @BeforeAll
+    static void lerPoliticaECambio() throws Exception {
+        politica = new LeitorPolitica().lerArquivo(Path.of("exemplos", "envelope", "politica-v4.json"));
+        cambio = new LeitorCambio().lerArquivo(Path.of("exemplos", "envelope", "cambio.json"));
+    }
+
+    /** Despesa crua em BRL, como sai do leitor: o motor converte, normaliza e arredonda (passo 1 da seção 8). */
     private static Despesa d(String id, String data, String categoria, String valor, boolean nf, String descricao) {
         return new Despesa(id, LocalDate.parse(data), categoria, categoria, descricao, "Fornecedor",
                 new BigDecimal(valor), nf);
     }
 
+    /** Despesa crua em moeda estrangeira. */
+    private static Despesa dm(String id, String data, String categoria, String valor, String moeda, boolean nf,
+            String descricao) {
+        return new Despesa(id, LocalDate.parse(data), categoria, categoria, descricao, "Fornecedor",
+                new BigDecimal(valor), nf, moeda, new BigDecimal(valor), null, null);
+    }
+
+    /** Colaborador de um centro de custo sem entrada na tabela: política padrão. */
     private static Resultado calcular(Despesa... despesas) {
-        Entrada entrada = new Entrada(new Colaborador("c-1", "Fulana", "CC"), JULHO, List.of(despesas));
-        return new MotorReembolso(Politicas.SO_PADRAO, Politicas.SEM_CAMBIO).calcular(entrada);
+        return calcularNoCentro("CC-SEM-ENTRADA", despesas);
+    }
+
+    private static Resultado calcularNoCentro(String centroCusto, Despesa... despesas) {
+        Entrada entrada = new Entrada(new Colaborador("c-1", "Fulana", centroCusto), JULHO, List.of(despesas));
+        return new MotorReembolso(politica, cambio).calcular(entrada);
     }
 
     private static ResultadoDespesa despesa(Resultado r, String id) {
@@ -305,6 +335,168 @@ class CasosDeBordaTest {
         assertEquals(v("90.00"), g.limite());
         assertEquals(v("90.00"), g.valorReembolsado());
         assertEquals(Ampliacao.VIAGEM, g.ampliacao());
+    }
+
+    // ---- Casos da v4 (spec 2.0, D-006) ----
+
+    @Test
+    @DisplayName("Centro de custo com tabela própria")
+    void centro_com_tabela_propria() {
+        Resultado r = calcularNoCentro("CC-COMERCIAL", d("d-1", DIA_UTIL, "alimentacao", "95.00", true, "Almoco"));
+
+        Grupo g = grupo(r, DIA_UTIL, "alimentacao");
+        assertEquals(v("90.00"), g.limite());
+        assertEquals(v("90.00"), g.valorReembolsado());
+        assertEquals("CC-COMERCIAL", r.tabelaAplicada());
+    }
+
+    @Test
+    @DisplayName("Categoria ausente da tabela do CC")
+    void categoria_ausente_da_tabela_do_cc() {
+        Resultado r = calcularNoCentro("CC-ADM", d("d-1", "2026-07-14", "hospedagem", "200.00", true, "Pousada 1 diaria"));
+
+        assertStatus(r, "d-1", Status.RECUSADA, Motivo.CATEGORIA_FORA_DA_POLITICA);
+    }
+
+    @Test
+    @DisplayName("Categoria com limite zero")
+    void categoria_com_limite_zero() {
+        Resultado r = calcularNoCentro("CC-ENG-PLATAFORMA",
+                d("d-1", "2026-07-14", "hospedagem", "480.00", true, "Hotel Rio - 2 diarias"));
+
+        assertStatus(r, "d-1", Status.RECUSADA, Motivo.CATEGORIA_FORA_DA_POLITICA);
+    }
+
+    @Test
+    @DisplayName("Hospedagem recusada ainda gera viagem")
+    void hospedagem_recusada_gera_viagem() {
+        Resultado r = calcularNoCentro("CC-ENG-PLATAFORMA",
+                d("d-1", "2026-07-14", "hospedagem", "480.00", true, "Hotel Rio - 2 diarias"),
+                d("d-2", "2026-07-15", "alimentacao", "100.00", true, "Jantar"));
+
+        assertStatus(r, "d-1", Status.RECUSADA, Motivo.CATEGORIA_FORA_DA_POLITICA);
+        Grupo g = grupo(r, "2026-07-15", "alimentacao");
+        assertEquals(v("112.50"), g.limite());
+        assertEquals(v("100.00"), g.valorReembolsado());
+        assertEquals(Ampliacao.VIAGEM, g.ampliacao());
+    }
+
+    @Test
+    @DisplayName("Representação no CC-COMERCIAL")
+    void representacao_no_comercial() {
+        Resultado r = calcularNoCentro("CC-COMERCIAL",
+                d("d-1", "2026-07-13", "representacao", "340.00", true, "Jantar com prospect"));
+
+        Grupo g = grupo(r, "2026-07-13", "representacao");
+        assertEquals(v("300.00"), g.limite());
+        assertEquals(v("300.00"), g.valorReembolsado());
+    }
+
+    @Test
+    @DisplayName("Representação fora do CC-COMERCIAL")
+    void representacao_fora_do_comercial() {
+        Resultado r = calcular(d("d-1", "2026-07-17", "representacao", "190.00", true, "Jantar com fornecedor"));
+
+        assertStatus(r, "d-1", Status.RECUSADA, Motivo.CATEGORIA_FORA_DA_POLITICA);
+    }
+
+    @Test
+    @DisplayName("Representação no sábado")
+    void representacao_no_sabado() {
+        Resultado r = calcularNoCentro("CC-COMERCIAL", d("d-1", SABADO, "representacao", "400.00", true, "Jantar"));
+
+        Grupo g = grupo(r, SABADO, "representacao");
+        assertEquals(v("450.00"), g.limite());
+        assertEquals(v("400.00"), g.valorReembolsado());
+    }
+
+    @Test
+    @DisplayName("Nome do CC com outra grafia")
+    void nome_do_cc_com_outra_grafia() {
+        Resultado r = calcularNoCentro("cc-comercial", d("d-1", DIA_UTIL, "alimentacao", "95.00", true, "Almoco"));
+
+        assertEquals("padrao", r.tabelaAplicada());
+        assertEquals(v("60.00"), grupo(r, DIA_UTIL, "alimentacao").limite());
+    }
+
+    @Test
+    @DisplayName("Despesa sem moeda")
+    void despesa_sem_moeda() {
+        Resultado r = calcular(d("d-1", DIA_UTIL, "alimentacao", "40.00", true, "Almoco"));
+
+        Despesa despesa = despesa(r, "d-1").despesa();
+        assertEquals("BRL", despesa.moeda());
+        assertFalse(despesa.emMoedaEstrangeira());
+        assertNull(despesa.taxaCambio());
+        assertEquals(v("40.00"), despesa.valor());
+    }
+
+    @Test
+    @DisplayName("Moeda sem cotação no arquivo")
+    void moeda_sem_cotacao() {
+        Resultado r = calcular(dm("d-1", "2026-07-21", "alimentacao", "55.00", "GBP", true, "Almoco - Londres"));
+
+        assertStatus(r, "d-1", Status.EM_REVISAO, Motivo.CAMBIO_INDISPONIVEL);
+        assertNull(despesa(r, "d-1").despesa().valor());
+    }
+
+    @Test
+    @DisplayName("Despesa em dia sem cotação")
+    void despesa_em_dia_sem_cotacao() {
+        Resultado r = calcular(dm("d-1", SABADO, "alimentacao", "30.00", "EUR", true, "Jantar de sabado"));
+
+        Despesa despesa = despesa(r, "d-1").despesa();
+        assertEquals(v("178.80"), despesa.valor());
+        assertEquals(v("5.96"), despesa.taxaCambio());
+        assertEquals(LocalDate.of(2026, 7, 17), despesa.dataCotacao());
+    }
+
+    @Test
+    @DisplayName("Data anterior à primeira cotação")
+    void data_anterior_a_primeira_cotacao() {
+        Resultado r = calcular(dm("d-1", "2026-07-10", "alimentacao", "20.00", "USD", true, "Almoco"));
+
+        assertStatus(r, "d-1", Status.EM_REVISAO, Motivo.CAMBIO_INDISPONIVEL);
+    }
+
+    @Test
+    @DisplayName("Conversão antes do arredondamento")
+    void conversao_antes_do_arredondamento() {
+        Resultado r = calcular(dm("d-1", "2026-07-13", "alimentacao", "10.005", "USD", true, "Cafe"));
+
+        assertEquals(v("54.23"), despesa(r, "d-1").despesa().valor());
+    }
+
+    @Test
+    @DisplayName("Nota fiscal em moeda estrangeira")
+    void nota_fiscal_em_moeda_estrangeira() {
+        Resultado r = calcular(dm("d-1", "2026-07-20", "transporte_urbano", "40.00", "USD", false, "Corridas do dia"));
+
+        assertEquals(v("220.00"), despesa(r, "d-1").despesa().valor());
+        assertStatus(r, "d-1", Status.EM_REVISAO, Motivo.NF_AUSENTE);
+    }
+
+    @Test
+    @DisplayName("Estorno em moeda estrangeira")
+    void estorno_em_moeda_estrangeira() {
+        Resultado r = calcular(
+                dm("d-1", "2026-07-20", "transporte_urbano", "50.00", "USD", true, "Corrida"),
+                dm("d-2", "2026-07-20", "transporte_urbano", "-10.00", "USD", false, "Estorno corrida"));
+
+        Grupo g = grupo(r, "2026-07-20", "transporte_urbano");
+        assertEquals(v("220.00"), g.valorTotal());
+        assertEquals(v("80.00"), g.valorReembolsado());
+    }
+
+    @Test
+    @DisplayName("Mesmo valor em moedas diferentes")
+    void mesmo_valor_em_moedas_diferentes() {
+        Resultado r = calcular(
+                dm("d-1", "2026-07-14", "alimentacao", "22.00", "EUR", true, "Almoco"),
+                dm("d-2", "2026-07-14", "alimentacao", "22.00", "USD", true, "Almoco"));
+
+        assertFalse(despesa(r, "d-1").motivos().contains(Motivo.DUPLICATA));
+        assertFalse(despesa(r, "d-2").motivos().contains(Motivo.DUPLICATA));
     }
 
     @Test
