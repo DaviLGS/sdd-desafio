@@ -39,7 +39,7 @@
 | Implementar | **Claude**, uma task por commit (T-001 a T-022) | `ce35fd0` … `5e5bc96` |
 | Escrever testes | **Claude**, junto com cada task | `tests/` |
 | Decidir lacunas achadas durante a implementação | **Eu** (D-002 a D-005), sempre perguntado pelo Claude | [DECISIONS.md](../specs/001-motor-reembolso/DECISIONS.md) |
-| Absorver o envelope | ✍️ **[VOCÊ]** — preencher no Dia 2 | |
+| Absorver o envelope | **Eu** decidi as 19 ambiguidades novas (E1–E19) e confirmei 4 decisões do Claude (D-007); **Claude** redigiu spec 2.0, plano e tasks e implementou T-023 a T-033 | [sessão 10](sessions/10-envelope-politica-v4.md), `149f189` … `738f1e6` |
 
 ✍️ **[VOCÊ] Por que dividi assim:** *(ex.: por que deleguei o levantamento das ambiguidades em
 vez de fazer sozinho primeiro, como o Claude chegou a sugerir na sessão 01)*
@@ -229,23 +229,104 @@ O que **não** reduz: ✍️ **[VOCÊ]** *(ex.: eu não escrevi nenhum caso de t
 
 ## O envelope
 
-*A mudança de requisito do Dia 2.* — ✍️ **[VOCÊ] preencher após absorver a mudança.**
+*A mudança de requisito do Dia 2: Política de Reembolso v4* ([envelope](../exemplos/envelope/00-ENVELOPE-LACRADO.md),
+[sessão 10](sessions/10-envelope-politica-v4.md), [D-006](../specs/001-motor-reembolso/DECISIONS.md)).
 
-**Hash antes do envelope:** `c7b408f` (último commit do sistema base)
+**O que chegou:** **A.** limites por centro de custo, lidos de um arquivo externo, com categoria nova
+(`representacao`) e um CC sem hospedagem; **B.** despesas em moeda estrangeira, convertidas pela taxa da
+data; **C.** (opcional) fila de aprovação acima de R$ 500 — **não feito**, por decisão minha: o
+reembolso da spec é por grupo, não por item, e especificar o C exigiria desfazer a AMB-002 (spec 2.1,
+seção 10).
 
-**Quantos arquivos toquei na mão:** `<n>`
-**Quanto tempo levou:** `<...>` *(anotar o horário de início quando o envelope chegar)*
-**Diff de absorção:** `<n> arquivos, +<n>/-<n> linhas` (`git diff c7b408f HEAD --stat`)
+**Hash antes do envelope:** `5f7712c` (último commit antes do envelope; a absorção vai de `909641d` a `738f1e6`).
+
+**Quantos arquivos toquei na mão:** **5** — os arquivos do envelope, que baixei e coloquei em
+`exemplos/envelope/`. Nenhum arquivo de spec, plano, código ou teste foi editado por mim: as 19 decisões
+(E1–E19) e a confirmação da D-007 eu dei no chat, e o Claude as escreveu na spec.
+✍️ **[VOCÊ]** *confirme — se você editou algo à mão, corrija este número.*
+
+**Quanto tempo levou:**
+- Do commit dos arquivos do envelope (`909641d`, 18h38 de 16/10) ao último commit da absorção
+  (`738f1e6`, 19h12): **34 minutos**.
+- Antes disso houve a análise de impacto e as minhas 19 decisões, que não aparecem nos commits.
+  ✍️ **[VOCÊ]** *horário em que o envelope chegou / em que você começou: `<hh:mm>` → tempo total `<...>`.*
+
+**Diff de absorção** (`git diff 5f7712c ed7197a --stat`, até o último commit de código/docs; o `738f1e6` só acrescenta este custo à D-006): **54 arquivos, +2.874/−483 linhas**, em 16 commits.
+
+| Área | Arquivos | Linhas |
+|---|---|---|
+| `src/` | 24 (15 alterados, 9 novos) | +644 / −172 |
+| `tests/` | 19 (14 alterados, 5 novos) | +1.283 / −178 |
+| `specs/` (spec, plano, tasks, DECISIONS) | 4 | +600 / −101 |
+| `exemplos/envelope/` | 5 | +285 |
+| README e `CLAUDE.md` | 2 | +62 / −32 |
+
+Suíte de testes: **237 → 344**, todos passando.
+
+**Quanto veio de reexecutar tasks a partir da spec vs. edição manual:**
+- **Tasks reexecutadas a partir da spec atualizada:** 11 tasks novas (T-023 a T-033), uma por commit,
+  cada uma citando as RN/AMB que atende. Todo o código e todos os testes (43 arquivos) vieram delas.
+- **Edição manual minha:** 5 arquivos (os do envelope), mais as 19 decisões e 4 confirmações dadas no chat.
+- **Tasks antigas afetadas** (D-006): T-002, T-005, T-013, T-014, T-015, T-017, T-019, T-020, T-021 e
+  T-022 — refeitas *dentro* das tasks novas, sem reabrir as antigas.
 
 **Absorveu de graça:**
+- **15 dos 30 arquivos de `src/` não mudaram**: `Arredondamento`, `Normalizacao`, `PeriodoCompetencia`,
+  `StatusDespesa`, `DiasViagem`, `NoitesHospedagem`, `AmpliacaoLimite` e 8 records/enums do domínio.
+- O motor **já recebia a `Politica` como parâmetro**. O plano v1 (seção 4) tinha descartado o arquivo
+  externo com a ressalva *"se o Dia 2 pedir políticas variáveis em tempo de execução, isso é revisto"* —
+  foi exatamente o que aconteceu, e as regras não mudaram de assinatura: só mudou de onde vêm os números.
+- As regras eram funções puras sem I/O, então política e câmbio entraram como dados, com teste sem arquivo
+  (`Rn013TabelaCentroCustoTest`, `Rn014ConversaoMoedaTest`).
+- A seção 9 calculada à mão: recalculá-la para os três arquivos **antes** do código deu o alvo exato, e o
+  motor bateu na primeira execução (216,53 / 1.993,26 / 373,76; commit `362c2cd`).
 
 **Resistiu:**
+- **A lista fixa "alimentação e transporte"**, espalhada em `LimiteDiario`, `Politica` e `Estornos`. Com
+  uma categoria nova (`representacao`), virou "categorias de periodicidade `dia`" (T-023, AMB-026).
+- **A `Despesa`**, que só conhecia um valor em R$: ganhou `moeda`, `valorOriginal`, `taxaCambio` e
+  `dataCotacao`, e `valor` passou a poder ser `null` (T-026, DT-010). Isso obrigou a ajustar
+  `NotaFiscal`, `Duplicatas` e `Estornos` (T-028).
+- **A constante `Politica.V3`**, usada pela CLI: não deu para removê-la na T-023 como planejado; a remoção
+  foi adiada para a T-031 (registrado no `tasks.md`).
+- **O teste de rastreabilidade da seção 7** ficou vermelho de `149f189` até `f5fa575`, apontando os 16
+  casos de borda novos sem teste. Foi uma quebra intencional e registrada, não desligada.
 
-**Ordem em que fiz:**
+**Ordem em que fiz** (os timestamps estão no `git log`):
+
+| Ordem | Commit | O quê |
+|---|---|---|
+| 1 | `909641d` | Arquivos do envelope |
+| 2 | `149f189` | Spec 2.0 + D-006 (inclusive a seção 9 recalculada à mão) |
+| 3 | `55b592b` | Spec 2.1 + D-007 (confirmação das decisões provisórias) |
+| 4 | `ae2c86c` | Plano 2.0 (DT-007 a DT-010) |
+| 5 | `9229702` | Tasks: Fase 6, T-023 a T-033 |
+| 6 | `45b7391` … `ed7197a` | Código, uma task por commit |
+| 7 | `738f1e6` | Custo registrado na D-006 |
+
+Spec → DECISIONS → tasks → código, sem exceção.
 
 **Se eu tivesse escrito a spec original sabendo desta mudança:**
+✍️ **[VOCÊ]** *revise e reescreva com as suas palavras; os pontos abaixo são o que a absorção mostrou:*
+- Teria escrito as regras de limite em função de **"limite por dia" e "limite por noite"**, e não de
+  "alimentação e transporte" — foi a principal resistência.
+- Teria deixado **os números da política fora da spec e do código** desde a v1 (ex.: "o limite de cada
+  categoria vem da tabela vigente"), com a v3 como um exemplo de tabela.
+- Teria separado **valor informado** de **valor considerado** desde o início: a v1 já arredondava na
+  entrada (RN-002), e a conversão de moeda é o mesmo tipo de transformação.
 
 **O que a spec me poupou, em concreto:**
+- **O alvo antes do código:** a seção 9 recalculada à mão para os três arquivos virou o teste de
+  integração da T-029, e o motor acertou de primeira.
+- **O mesmo processo de ambiguidades:** o envelope avisava que "traz várias"; com o formato
+  AMB/decisão/justificativa já pronto, as 19 novas (AMB-021 a AMB-037) foram levantadas e decididas antes
+  do código — inclusive as duas que o envelope apontava ("aplica-se a política padrão" → AMB-021;
+  "taxa da data da despesa" → AMB-031).
+- **A rede de segurança da rastreabilidade:** o teste que lê a seção 7 da spec acusou sozinho os 16 casos
+  novos ainda sem teste.
+- **O mapa do que quebrar:** a D-006 listou antes do código o que seria invalidado (total 680,53,
+  `Politica.V3`, lista fixa de categorias, CLI e os testes dependentes), e foi exatamente isso que as
+  tasks ajustaram.
 
 ---
 
