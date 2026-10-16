@@ -121,4 +121,48 @@ class LeitorEntradaTest {
         EntradaInvalidaException erro = assertThrows(EntradaInvalidaException.class, () -> leitor.lerTexto(json));
         assertEquals("despesas[0].valor: deve ser número", erro.getMessage());
     }
+
+    private static final String CABECALHO = "{\"colaborador\":{\"id\":\"c-1\",\"nome\":\"F\",\"centro_custo\":\"CC\"},"
+            + "\"periodo\":{\"competencia\":\"2026-07\",\"inicio\":\"2026-07-01\",\"fim\":\"2026-07-31\"},";
+
+    private static String comDespesa(String camposExtras) {
+        return CABECALHO + "\"despesas\":[{\"id\":\"e-1\",\"data\":\"2026-07-14\",\"categoria\":\"alimentacao\","
+                + "\"descricao\":\"x\",\"fornecedor\":\"y\",\"valor\":22.00,\"tem_nota_fiscal\":true" + camposExtras + "}]}";
+    }
+
+    @Test
+    @DisplayName("Seção 4 / RN-014: moeda presente é lida como veio (EUR), com o valor original exato")
+    void moeda_presente() throws Exception {
+        Despesa despesa = leitor.lerTexto(comDespesa(",\"moeda\":\"EUR\"")).despesas().get(0);
+
+        assertEquals("EUR", despesa.moeda());
+        assertEquals(new BigDecimal("22.00"), despesa.valorOriginal());
+        assertTrue(despesa.emMoedaEstrangeira());
+    }
+
+    @Test
+    @DisplayName("Seção 4 / RN-014: moeda ausente = BRL")
+    void moeda_ausente_e_brl() throws Exception {
+        Despesa despesa = leitor.lerTexto(comDespesa("")).despesas().get(0);
+
+        assertEquals("BRL", despesa.moeda());
+        assertFalse(despesa.emMoedaEstrangeira());
+    }
+
+    @Test
+    @DisplayName("Seção 4: moeda que não é texto é rejeitada")
+    void moeda_nao_textual() {
+        assertThrows(EntradaInvalidaException.class, () -> leitor.lerTexto(comDespesa(",\"moeda\":978")));
+    }
+
+    @Test
+    @DisplayName("Seção 4: o arquivo do envelope é lido, com as moedas de cada despesa (e-010 sem moeda = BRL)")
+    void le_despesas_do_envelope() throws Exception {
+        var despesas = leitor.lerArquivo(Path.of("exemplos", "envelope", "despesas-envelope.json")).despesas();
+
+        assertEquals(10, despesas.size());
+        assertEquals("EUR", despesas.get(1).moeda());
+        assertEquals("GBP", despesas.get(5).moeda());
+        assertEquals("BRL", despesas.get(9).moeda());
+    }
 }

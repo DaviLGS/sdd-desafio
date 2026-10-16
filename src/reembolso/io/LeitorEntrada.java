@@ -59,6 +59,7 @@ public final class LeitorEntrada {
             String caminho = "despesas[" + i + "]";
             JsonNode no = Json.comoObjeto(lista.get(i), caminho);
             String categoria = texto(no, "categoria", caminho + ".categoria");
+            BigDecimal valor = numero(no, "valor", caminho + ".valor");
             despesas.add(new Despesa(
                     texto(no, "id", caminho + ".id"),
                     data(no, "data", caminho + ".data"),
@@ -66,9 +67,25 @@ public final class LeitorEntrada {
                     categoria,
                     texto(no, "descricao", caminho + ".descricao"),
                     texto(no, "fornecedor", caminho + ".fornecedor"),
-                    numero(no, "valor", caminho + ".valor"),
-                    booleano(no, "tem_nota_fiscal", caminho + ".tem_nota_fiscal")));
+                    valor,
+                    booleano(no, "tem_nota_fiscal", caminho + ".tem_nota_fiscal"),
+                    moeda(no, caminho + ".moeda"),
+                    valor,
+                    null,
+                    null));
         }
         return despesas;
+    }
+
+    /** Campo opcional; ausente (ou nulo) = BRL (RN-014). O código é guardado exatamente como veio. */
+    private static String moeda(JsonNode despesa, String caminho) throws EntradaInvalidaException {
+        JsonNode no = despesa.get("moeda");
+        if (no == null || no.isNull()) {
+            return Despesa.BRL;
+        }
+        if (!no.isTextual()) {
+            throw new EntradaInvalidaException(caminho + ": deve ser texto");
+        }
+        return no.textValue();
     }
 }

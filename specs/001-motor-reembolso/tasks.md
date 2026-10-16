@@ -221,9 +221,9 @@ seção 7 que ainda não têm teste — exatamente o papel dele. Não foi deslig
 - [x] **T-025** — Seleção da tabela por centro de custo (`regras.SelecaoTabela`).
   - **Atende:** RN-013, RN-001 (categorias da política), AMB-021, AMB-022, AMB-025
   - **Aceite:** `Rn013TabelaCentroCustoTest` passa: `CC-COMERCIAL` → tabela própria; `CC-SUPORTE-N2` → `padrao`; `CC-ADM` sem hospedagem → hospedagem não elegível; `" CC-COMERCIAL "` → `CC-COMERCIAL`; `cc-comercial` → `padrao`; `representacao` só no `CC-COMERCIAL`.
-  - **Commit:**
+  - **Commit:** `4a7e6e7`
 
-- [ ] **T-026** — Leitura do câmbio (`io.LeitorCambio` → `TabelaCambio`) e campo `moeda` na entrada.
+- [x] **T-026** — Leitura do câmbio (`io.LeitorCambio` → `TabelaCambio`) e campo `moeda` na entrada.
   - **Atende:** seção 4 (arquivo de câmbio, campo `moeda`), AMB-028
   - **Aceite:** `LeitorCambioTest` passa (lê `cambio.json`; rejeita taxa não numérica e data inválida); `LeitorEntradaTest` passa com `moeda` presente, ausente (= `BRL`) e não textual (rejeitada).
   - **Commit:**

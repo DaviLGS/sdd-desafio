@@ -79,6 +79,10 @@ public final class MotorReembolso {
                 despesa.descricao(),
                 despesa.fornecedor(),
                 Arredondamento.arredondar(despesa.valor()),
-                despesa.temNotaFiscal());
+                despesa.temNotaFiscal(),
+                despesa.moeda(),
+                despesa.valorOriginal(),
+                despesa.taxaCambio(),
+                despesa.dataCotacao());
     }
 }
