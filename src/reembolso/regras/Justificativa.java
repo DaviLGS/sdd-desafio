@@ -39,6 +39,7 @@ public final class Justificativa {
                     + " sem nota fiscal (RN-006).";
             case NOITES_NAO_IDENTIFICADAS -> "número de noites não identificado na descrição (RN-005).";
             case ESTORNO_SEM_DESPESA -> "estorno sem despesa suficiente no mesmo dia e categoria para abater (RN-011).";
+            case CAMBIO_INDISPONIVEL -> "sem cotação da moeda na data da despesa ou antes dela no arquivo de câmbio (RN-014).";
         };
     }
 

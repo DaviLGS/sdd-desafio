@@ -226,9 +226,9 @@ seção 7 que ainda não têm teste — exatamente o papel dele. Não foi deslig
 - [x] **T-026** — Leitura do câmbio (`io.LeitorCambio` → `TabelaCambio`) e campo `moeda` na entrada.
   - **Atende:** seção 4 (arquivo de câmbio, campo `moeda`), AMB-028
   - **Aceite:** `LeitorCambioTest` passa (lê `cambio.json`; rejeita taxa não numérica e data inválida); `LeitorEntradaTest` passa com `moeda` presente, ausente (= `BRL`) e não textual (rejeitada).
-  - **Commit:**
+  - **Commit:** `df13835`
 
-- [ ] **T-027** — Conversão de moeda (`regras.ConversaoMoeda`).
+- [x] **T-027** — Conversão de moeda (`regras.ConversaoMoeda`).
   - **Atende:** RN-014, RN-002, AMB-030, AMB-031, AMB-032, AMB-033, AMB-036
   - **Aceite:** `Rn014ConversaoMoedaTest` passa: EUR 22 em 14/07 → 130,46; sábado 18/07 → cotação de 17/07; GBP → sem cotação; 10/07 → sem cotação; 30/07 → cotação de 28/07; BRL e sem moeda → sem conversão; USD 10,005 × 5,42 → 54,23; estorno −USD 10 → −55,00.
   - **Commit:**

@@ -7,7 +7,8 @@ public enum Motivo {
     DUPLICATA(Status.EM_REVISAO),
     NF_AUSENTE(Status.EM_REVISAO),
     NOITES_NAO_IDENTIFICADAS(Status.EM_REVISAO),
-    ESTORNO_SEM_DESPESA(Status.EM_REVISAO);
+    ESTORNO_SEM_DESPESA(Status.EM_REVISAO),
+    CAMBIO_INDISPONIVEL(Status.EM_REVISAO);
 
     private final Status statusResultante;
 
