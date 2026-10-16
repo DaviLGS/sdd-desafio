@@ -97,7 +97,22 @@ T-022; novas — T-023 em diante (Fase 6 do `tasks.md`).
 "valor reembolsável do item" exigiria antes desfazer a AMB-002. O envelope diz que deixar a spec
 inconsistente para chegar no C custa pontos.
 
-**Custo:** <preencher ao final: arquivos tocados à mão, tempo, `git diff 5f7712c HEAD --stat`>
+**Custo** (`git diff 5f7712c ed7197a`):
+- **Total:** 54 arquivos, +2.874/−483 linhas, 16 commits, de 18h38 a 19h12 de 16/10 (34 minutos
+  entre o commit do envelope e o último commit; a análise de impacto e as decisões E1–E19 vieram antes).
+- **`src/`:** 24 arquivos (15 alterados, 9 novos), +644/−172. **15 arquivos de `src/` não mudaram**:
+  `Arredondamento`, `Normalizacao`, `PeriodoCompetencia`, `StatusDespesa`, `DiasViagem`,
+  `NoitesHospedagem`, `AmpliacaoLimite`, `Entrada`, `Colaborador`, `Periodo`, `Grupo`,
+  `ResultadoDespesa`, `Status`, `Ampliacao`, `EntradaInvalidaException`.
+- **`tests/`:** 19 arquivos (14 alterados, 5 novos), +1.283/−178. Suíte: 237 → 344 testes.
+- **Documentação:** spec, plano, tasks, DECISIONS, README e CLAUDE.md.
+- **Arquivos tocados à mão pelo responsável:** os 5 arquivos do envelope (baixados e colocados em
+  `exemplos/envelope/`); as decisões E1–E19 e a confirmação da D-007 foram dadas no chat e escritas na
+  spec pelo Claude.
+- **O que absorveu de graça:** o motor já recebia a `Politica` como parâmetro (plano v1, seção 4) e as
+  regras eram funções puras; trocar a origem dos números não mudou a assinatura das regras.
+- **O que resistiu:** a lista fixa "alimentação e transporte" (em `LimiteDiario`, `Politica` e
+  `Estornos`), que virou "periodicidade `dia`"; e a `Despesa`, que ganhou 4 campos para o câmbio.
 
 ---
 
