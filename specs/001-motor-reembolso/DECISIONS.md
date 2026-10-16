@@ -10,6 +10,30 @@ Ordem cronológica inversa: a mais recente primeiro.
 
 ---
 
+## D-007 — Confirmação das decisões provisórias da spec 2.0 · `2026-10-16`
+
+**Gatilho:** revisão da spec 2.0 pelo responsável. A seção 10 listava quatro decisões que o Claude
+tomou ao redigir a versão 2.0, sem que o responsável as tivesse dado.
+
+**O que mudou na spec (2.0 → 2.1):** as quatro foram confirmadas sem alteração e saíram da lista
+de pendências da seção 10:
+- despesa com `CAMBIO_INDISPONIVEL` sai com `valor` = `null`, e NF e abatimento de estorno não são
+  avaliados para ela (RN-014);
+- campos de saída `data_cotacao` e `resumo.tabela_aplicada` (seção 4);
+- código da moeda comparado exatamente como informado (RN-014);
+- o tipo de regra (por dia ou por noite) vem da `periodicidade` do arquivo (AMB-026).
+
+**Por quê:** decisões provisórias não confirmadas são regra de negócio que o responsável não
+decidiu; mesmo procedimento da D-001.
+
+**O que isso invalidou:** nada (ainda não há código da v4).
+
+**Tasks afetadas:** nenhuma além das da D-006.
+
+**Custo:** 2 arquivos de documentação; poucos minutos.
+
+---
+
 ## D-006 — Envelope do Dia 2: Política de Reembolso v4 · `2026-10-16`
 
 **Gatilho:** envelope lacrado do Dia 2 (`exemplos/envelope/00-ENVELOPE-LACRADO.md`), com

@@ -1,6 +1,6 @@
 # Spec — Motor de Cálculo de Reembolso
 
-**Versão:** 2.0 · **Status:** rascunho · **Última alteração:** 2026-10-16
+**Versão:** 2.1 · **Status:** rascunho · **Última alteração:** 2026-10-16
 
 > **Regra de ouro deste arquivo:** ele descreve o QUÊ e o PORQUÊ. Nenhuma linha
 > aqui pode citar linguagem, biblioteca, classe, função ou estrutura de pasta.
@@ -735,10 +735,9 @@ Sem entrada na tabela → tabela `padrao` (alimentação 60, transporte 80, hosp
 
 1. **RN-008 (fim de semana/plantão)** não vem da política do RH. Deve ser validada com o RH antes do uso em produção.
 2. **Item C da v4 (fila de aprovação acima de R$ 500)** não foi especificado nem implementado, por decisão do responsável: é opcional, e há uma ambiguidade estrutural — o reembolso desta spec é calculado por **grupo**, não por item, então "valor reembolsável do item" não existe hoje. Especificá-lo exigiria decidir antes como repartir o reembolso de um grupo entre os seus itens (o que a AMB-002 decidiu não fazer).
-3. **Decisões provisórias tomadas ao redigir a versão 2.0, ainda não confirmadas pelo responsável:**
-   - Despesa com `CAMBIO_INDISPONIVEL` sai com `valor` = `null`, e as regras que dependem do valor em BRL (nota fiscal, abatimento de estorno) não são avaliadas para ela (RN-014).
-   - O campo de saída `data_cotacao` e o campo `resumo.tabela_aplicada` (seção 4), acrescentados para que se possa auditar a cotação usada (AMB-031) e a tabela escolhida (RN-013).
-   - O código da moeda é comparado exatamente como informado (`usd` em minúsculas não é encontrado e cai em `CAMBIO_INDISPONIVEL`).
-   - A categoria é reembolsável por ter limite > 0 na tabela; o tipo de regra (diária ou por noite) vem da `periodicidade`, e não do nome da categoria (AMB-026).
+
+As quatro decisões provisórias da versão 2.0 (valor `null` sem cotação, campos `data_cotacao` e
+`tabela_aplicada`, código de moeda exato, regra definida pela `periodicidade`) foram confirmadas
+pelo responsável e já estão nas regras (ver `DECISIONS.md`, D-007).
 
 As decisões provisórias da versão 1.0 foram confirmadas pelo responsável e incorporadas às regras na versão 1.1 (ver `DECISIONS.md`, D-001).
