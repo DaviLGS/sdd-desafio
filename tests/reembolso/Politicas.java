@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.Map;
 import reembolso.dominio.LimiteCategoria;
 import reembolso.dominio.Periodicidade;
+import reembolso.dominio.TabelaCambio;
+import reembolso.dominio.TabelaPoliticas;
 import reembolso.regras.Politica;
 
 /**
@@ -36,6 +38,12 @@ public final class Politicas {
             Map.of("alimentacao", dia("90.00"), "transporte_urbano", dia("150.00"), "hospedagem", diaria("400.00"),
                     "representacao", dia("300.00")),
             PISO_NF, ACRESCIMO);
+
+    /** Arquivo de política só com a tabela padrão: qualquer centro de custo cai nela. */
+    public static final TabelaPoliticas SO_PADRAO = new TabelaPoliticas(Map.of(), PADRAO.categorias(), PISO_NF, ACRESCIMO);
+
+    /** Arquivo de câmbio vazio: só despesas em BRL. */
+    public static final TabelaCambio SEM_CAMBIO = new TabelaCambio(Map.of());
 
     /** Tabela do {@code CC-ENG-PLATAFORMA}: alimentação 75, transporte 80, hospedagem 0 (não reembolsável). */
     public static final Politica ENG_PLATAFORMA = new Politica("CC-ENG-PLATAFORMA",

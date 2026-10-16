@@ -62,12 +62,12 @@ class EscritorSaidaTest {
     private final EscritorSaida escritor = new EscritorSaida();
 
     private static Resultado calcular(String json) throws Exception {
-        return new MotorReembolso(Politicas.PADRAO).calcular(new LeitorEntrada().lerTexto(json));
+        return new MotorReembolso(Politicas.SO_PADRAO, Politicas.SEM_CAMBIO).calcular(new LeitorEntrada().lerTexto(json));
     }
 
     private static Resultado calcularExemplo() throws Exception {
         var entrada = new LeitorEntrada().lerArquivo(Path.of("exemplos", "despesas-exemplo.json"));
-        return new MotorReembolso(Politicas.PADRAO).calcular(entrada);
+        return new MotorReembolso(Politicas.SO_PADRAO, Politicas.SEM_CAMBIO).calcular(entrada);
     }
 
     @Test

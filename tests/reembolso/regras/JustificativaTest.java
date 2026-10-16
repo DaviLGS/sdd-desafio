@@ -17,7 +17,9 @@ import reembolso.dominio.Motivo;
 import reembolso.dominio.Resultado;
 import reembolso.dominio.ResultadoDespesa;
 import reembolso.dominio.Status;
+import reembolso.io.LeitorCambio;
 import reembolso.io.LeitorEntrada;
+import reembolso.io.LeitorPolitica;
 
 /** T-018: justificativa textual de cada despesa (spec, seção 4). */
 class JustificativaTest {
@@ -70,10 +72,19 @@ class JustificativaTest {
     }
 
     @Test
+    @DisplayName("Seção 4 / RN-014: sem cotação → texto cita o arquivo de câmbio e a RN-014")
+    void cambio_indisponivel() {
+        assertEquals("Em revisão: sem cotação da moeda na data da despesa ou antes dela no arquivo de câmbio (RN-014).",
+                justificativa(Status.EM_REVISAO, List.of(Motivo.CAMBIO_INDISPONIVEL)));
+    }
+
+    @Test
     @DisplayName("Seção 4: o motor preenche a justificativa de toda despesa do exemplo")
     void motor_preenche_justificativas() throws Exception {
         var entrada = new LeitorEntrada().lerArquivo(Path.of("exemplos", "despesas-exemplo.json"));
-        Resultado resultado = new MotorReembolso(Politicas.PADRAO).calcular(entrada);
+        var tabelas = new LeitorPolitica().lerArquivo(Path.of("exemplos", "envelope", "politica-v4.json"));
+        var cambio = new LeitorCambio().lerArquivo(Path.of("exemplos", "envelope", "cambio.json"));
+        Resultado resultado = new MotorReembolso(tabelas, cambio).calcular(entrada);
 
         for (ResultadoDespesa r : resultado.despesas()) {
             assertFalse(r.justificativa().isBlank(), r.despesa().id());

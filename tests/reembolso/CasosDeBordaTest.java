@@ -49,7 +49,7 @@ class CasosDeBordaTest {
 
     private static Resultado calcular(Despesa... despesas) {
         Entrada entrada = new Entrada(new Colaborador("c-1", "Fulana", "CC"), JULHO, List.of(despesas));
-        return new MotorReembolso(Politicas.PADRAO).calcular(entrada);
+        return new MotorReembolso(Politicas.SO_PADRAO, Politicas.SEM_CAMBIO).calcular(entrada);
     }
 
     private static ResultadoDespesa despesa(Resultado r, String id) {

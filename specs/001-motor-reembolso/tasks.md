@@ -236,9 +236,9 @@ seção 7 que ainda não têm teste — exatamente o papel dele. Não foi deslig
 - [x] **T-028** — Regras existentes com valor convertido: NF em BRL e ignorada sem cotação; `moeda` na duplicata; estorno pelo sinal do valor original.
   - **Atende:** RN-006, RN-009, RN-011, AMB-034, AMB-035
   - **Aceite:** `Rn006NotaFiscalTest` (USD 40 = 220 sem NF → `NF_AUSENTE`; `valor` nulo → sem motivo), `Rn009DuplicataTest` (EUR 22 × USD 22 → não duplicata; sem moeda × BRL → duplicata) e `Rn011EstornoTest` passam.
-  - **Commit:**
+  - **Commit:** `edb7258`
 
-- [ ] **T-029** — Motor v4: passo 0 (tabela), conversão no passo 1, motivo `CAMBIO_INDISPONIVEL` no passo 2, `tabelaAplicada` no resultado; justificativa do novo motivo.
+- [x] **T-029** — Motor v4: passo 0 (tabela), conversão no passo 1, motivo `CAMBIO_INDISPONIVEL` no passo 2, `tabelaAplicada` no resultado; justificativa do novo motivo.
   - **Atende:** seções 8 e 9 da spec, RN-013, RN-014, RN-012
   - **Aceite:** `MotorReembolsoExemploTest` reescrito para as três entradas da seção 9: 216,53 (5/6/3), 1.993,26 (7/2/1) e 373,76 (3/0/1), com status, motivos e grupos de cada tabela; `JustificativaTest` cobre `CAMBIO_INDISPONIVEL`.
   - **Commit:**

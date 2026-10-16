@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.text.Normalizer;
+import java.util.Map;
 import reembolso.dominio.Resultado;
+import reembolso.dominio.TabelaCambio;
+import reembolso.dominio.TabelaPoliticas;
 import reembolso.io.EntradaInvalidaException;
 import reembolso.io.EscritorSaida;
 import reembolso.io.LeitorEntrada;
@@ -79,7 +82,11 @@ public final class Main {
 
         Resultado resultado;
         try {
-            resultado = new MotorReembolso(Politica.V3).calcular(new LeitorEntrada().lerArquivo(entrada));
+            // Até a T-031: só a tabela padrão (valores da v3) e nenhum câmbio.
+            TabelaPoliticas v3 = new TabelaPoliticas(Map.of(), Politica.V3.categorias(),
+                    Politica.V3.pisoNotaFiscal(), Politica.V3.percentualAcrescimo());
+            resultado = new MotorReembolso(v3, new TabelaCambio(Map.of()))
+                    .calcular(new LeitorEntrada().lerArquivo(entrada));
         } catch (EntradaInvalidaException e) {
             console(err, "entrada inválida: " + e.getMessage());
             return ENTRADA_INVALIDA;

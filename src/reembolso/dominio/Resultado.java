@@ -8,6 +8,7 @@ import java.util.Map;
 public record Resultado(
         Colaborador colaborador,
         Periodo periodo,
+        String tabelaAplicada,
         List<ResultadoDespesa> despesas,
         List<Grupo> grupos,
         BigDecimal totalReembolsado,
