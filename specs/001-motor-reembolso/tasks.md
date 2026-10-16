@@ -211,9 +211,9 @@ seção 7 que ainda não têm teste — exatamente o papel dele. Não foi deslig
 - [x] **T-023** — `Politica` configurável: `LimiteCategoria` e `Periodicidade` no domínio; `Politica` resolvida por tabela (`elegivel`, `periodicidade`, `limiteDiario`, `limitePorNoite`, percentual e piso); fixture `tests/reembolso/Politicas.java` (padrão, CC-COMERCIAL, CC-ENG-PLATAFORMA); `LimiteDiario`, `LimiteHospedagem` e `Estornos` agrupam pela `periodicidade`. `Politica.V3` continua só para a CLI, montada no formato novo e marcada `@Deprecated`, e sai na T-031 (a CLI só lê a política do arquivo a partir dela).
   - **Atende:** RN-003, RN-004, RN-005, RN-011 (periodicidade), AMB-023, AMB-026, AMB-027
   - **Aceite:** `PoliticaTest` (reescrito) passa: limite 0 → não elegível; categoria ausente → não elegível; ampliado = base × 1,5; `representacao` de periodicidade `dia` forma grupo diário (`Rn004LimiteDiarioTest`); todos os testes da v1 passam usando a fixture.
-  - **Commit:**
+  - **Commit:** `45b7391`
 
-- [ ] **T-024** — Leitura e validação do arquivo de política (`io.LeitorPolitica` → `TabelaPoliticas`).
+- [x] **T-024** — Leitura e validação do arquivo de política (`io.LeitorPolitica` → `TabelaPoliticas`).
   - **Atende:** seção 4 (arquivo de política), AMB-028, AMB-029
   - **Aceite:** `LeitorPoliticaTest` passa: lê `politica-v4.json` (padrão + 3 CCs, piso 100, percentual 50); `vigencia` ignorada; rejeita arquivo ausente, sem `padrao`, `limite` negativo ou não numérico, `periodicidade` desconhecida.
   - **Commit:**
