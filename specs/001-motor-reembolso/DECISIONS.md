@@ -10,6 +10,73 @@ Ordem cronológica inversa: a mais recente primeiro.
 
 ---
 
+## D-006 — Envelope do Dia 2: Política de Reembolso v4 · `2026-10-16`
+
+**Gatilho:** envelope lacrado do Dia 2 (`exemplos/envelope/00-ENVELOPE-LACRADO.md`), com
+`politica-v4.json`, `cambio.json` e dois conjuntos de despesas. Vigência imediata, retroativa à
+competência atual. Ponto de partida: commit `5f7712c`.
+
+**O que o envelope pede:**
+- **A.** Limites por centro de custo, lidos de um arquivo externo (`politica-v4.json`); categoria
+  nova `representacao` no `CC-COMERCIAL`; `CC-ENG-PLATAFORMA` não reembolsa hospedagem; CC sem
+  entrada usa a política padrão.
+- **B.** Campo `moeda` (ISO 4217, ausente = BRL); conversão pela taxa da data da despesa
+  (`cambio.json`); limites sempre em BRL.
+- **C.** (opcional) Fila de aprovação acima de R$ 500 — **não feito** (ver abaixo).
+
+**O que mudou na spec (1.5 → 2.0):**
+- Seção 3 (fora de escopo): saem "só R$" e "sem regras por centro de custo"; entram "sem valores
+  de política embutidos" e "sem o item C".
+- Seção 4: três arquivos de entrada obrigatórios (despesas, política, câmbio); campo `moeda`;
+  saída com `valor` em BRL, campos de câmbio para despesa estrangeira e `resumo.tabela_aplicada`;
+  motivo novo `CAMBIO_INDISPONIVEL`.
+- RN-002: arredondamento uma vez, sobre o valor já convertido.
+- RN-003: elegível = categoria na tabela aplicada com limite > 0.
+- RN-004 / RN-005: limites vêm da tabela; a regra (por dia ou por noite) vem da `periodicidade`.
+- RN-006: piso vem do arquivo; comparado em BRL.
+- RN-007 / RN-008: percentual vem do arquivo; vale para toda categoria por dia; hospedagem
+  recusada também gera viagem.
+- RN-009: `moeda` entra no critério de duplicata.
+- RN-011: estorno estrangeiro é convertido antes de abater.
+- **RN-013 (nova):** tabela de limites por centro de custo.
+- **RN-014 (nova):** conversão de moeda.
+- **Ambiguidades novas AMB-021 a AMB-037** (decisões E1–E19 do responsável, todas na opção
+  recomendada): tabela incompleta, categoria nova fora do CC, limite zero, viagem com hospedagem
+  recusada, nome do CC, periodicidade, piso e percentual do arquivo, arquivos ausentes, vigência,
+  moeda sem cotação, dia sem cotação ("taxa da data da despesa"), data fora do arquivo, ordem
+  conversão/arredondamento, NF em moeda estrangeira, moeda na duplicata, estorno estrangeiro, saída.
+- Seção 7: 16 casos de borda novos; os antigos passam a declarar a tabela padrão.
+- Seção 8: passo 0 (tabela) e conversão no passo 1.
+- Seção 9: reescrita para os três arquivos de entrada, calculada à mão antes do código.
+- Seção 10: item C e quatro decisões provisórias do Claude a confirmar.
+
+**Por quê:** comunicado do RH (política v4). As decisões das ambiguidades novas estão
+justificadas na seção 6 da spec.
+
+**O que isso invalidou:**
+- **Resultado do exemplo original:** a colaboradora do `despesas-exemplo.json` é do
+  `CC-ENG-PLATAFORMA`. Com a v4, alimentação passa de 60 para 75, e a hospedagem (d-010, d-013)
+  deixa de ser reembolsável. Total: **R$ 680,53 → R$ 216,53**; quantidade 6/7/1 → **5/6/3**.
+- **Política embutida no código:** `Politica.V3` (T-002) deixa de existir como fonte; a política
+  passa a ser lida do arquivo.
+- **Lista fixa de categorias** "alimentação e transporte" em RN-004/RN-007/RN-008 (T-013, T-014):
+  passa a ser "categorias de periodicidade `dia`".
+- **Interface da linha de comando** (T-020): passa a receber os arquivos de política e câmbio.
+- **Testes que dependem de valores fixos da v3 ou do resultado antigo:** `PoliticaTest`,
+  `MotorReembolsoExemploTest` (680,53), `EscritorSaidaTest` (exemplo da seção 4 ganha
+  `tabela_aplicada`), `MainCliTest`, e os testes de regra que usam `Politica.V3`.
+
+**Tasks afetadas:** refeitas — T-002, T-005, T-013, T-014, T-015, T-017, T-019, T-020, T-021,
+T-022; novas — T-023 em diante (Fase 6 do `tasks.md`).
+
+**Item C (opcional) não feito:** o reembolso desta spec é por grupo, não por item; especificar
+"valor reembolsável do item" exigiria antes desfazer a AMB-002. O envelope diz que deixar a spec
+inconsistente para chegar no C custa pontos.
+
+**Custo:** <preencher ao final: arquivos tocados à mão, tempo, `git diff 5f7712c HEAD --stat`>
+
+---
+
 ## D-005 — Estorno que já tem outro motivo também recebe ESTORNO_SEM_DESPESA · `2026-10-14`
 
 **Gatilho:** T-021 (bateria dos casos de borda da seção 7). O caso "Estorno de hospedagem"
