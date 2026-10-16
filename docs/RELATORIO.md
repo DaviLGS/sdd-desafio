@@ -18,9 +18,12 @@
   São reconstruções, não cópias byte a byte — o cabeçalho de cada arquivo diz isso.
 - **Cronologia** (`git log --date=iso`): estrutura inicial em 09/10; sessão de trabalho em 14/10,
   das 16h06 às 19h14 — spec às 18h15, plano às 18h25, tasks às 18h28, primeiro código (T-001)
-  às 18h32. A ordem spec → plan → tasks → código está nos timestamps.
-- **Números:** 48 commits na `main`; 22 tasks; 237 testes; spec da v1.0 à v1.5; 5 mudanças de
-  spec registradas (D-001 a D-005).
+  às 18h32. Envelope em 16/10, das 18h38 às 19h12 — spec 2.0 às 18h42, plano às 18h57, tasks às
+  18h58, primeiro código (T-023) às 19h01. A ordem spec → plan → tasks → código está nos timestamps,
+  nos dois dias.
+- **Números** (até `fff1e97`): 69 commits na `main`; 33 tasks (22 do sistema base + 11 do envelope);
+  344 testes, todos passando; spec da v1.0 à v2.1; 7 mudanças de spec registradas (D-001 a D-007);
+  10 sessões exportadas.
 
 ---
 
