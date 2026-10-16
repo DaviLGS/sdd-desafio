@@ -256,9 +256,9 @@ seção 7 que ainda não têm teste — exatamente o papel dele. Não foi deslig
 - [x] **T-032** — Casos de borda da v4 (16 linhas novas da seção 7).
   - **Atende:** seção 7 da spec
   - **Aceite:** `CasosDeBordaTest` passa com um teste por linha da seção 7, incluindo as 16 novas; o teste de rastreabilidade contra a spec passa.
-  - **Commit:**
+  - **Commit:** `f5fa575`
 
-- [ ] **T-033** — README e `CLAUDE.md` atualizados para a v4 (comando com `--politica` e `--cambio`, resultados dos três exemplos).
+- [x] **T-033** — README e `CLAUDE.md` atualizados para a v4 (comando com `--politica` e `--cambio`, resultados dos três exemplos).
   - **Atende:** entrega (README)
   - **Aceite:** seguindo só o README, num clone limpo, os três comandos geram 216,53, 1.993,26 e 373,76.
   - **Commit:**

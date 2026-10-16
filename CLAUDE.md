@@ -36,7 +36,7 @@ Se o que eu pedi não está coberto por nenhuma task, me avise em vez de impleme
 
 - Linguagem: Java, alvo `--release 17` (JDK 17+), build com Maven 3.9. Detalhes e motivos em `plan.md`.
 - Compilar/empacotar: `mvn package` → gera `target/motor-reembolso.jar`
-- Rodar: `java -jar target/motor-reembolso.jar calcular --input exemplos/despesas-exemplo.json --output resultado.json`
+- Rodar: `java -jar target/motor-reembolso.jar calcular --input exemplos/despesas-exemplo.json --politica exemplos/envelope/politica-v4.json --cambio exemplos/envelope/cambio.json --output resultado.json`
 - Testes: `mvn test`
 - Lint/format: não há linter configurado. Siga o estilo do código ao redor.
 
@@ -45,12 +45,14 @@ Se o que eu pedi não está coberto por nenhuma task, me avise em vez de impleme
 - Pastas: código em `src/`, testes em `tests/` (não o layout padrão do Maven; ver `plan.md` DT-003).
 - Pacotes: `cli` (linha de comando), `io` (leitura/escrita de JSON), `dominio` (records e enums),
   `regras` (regras de negócio puras, **sem I/O**). Só `cli` e `io` tocam disco ou JSON.
-- Valores da política (limites, fator de ampliação, piso da NF, categorias) vivem **apenas** em
-  `regras.Politica`. Nunca escreva 60, 80, 250, 100 ou 1.5 soltos no código.
+- Valores da política (limites, percentual de ampliação, piso da NF, categorias) vêm **só** do arquivo
+  `--politica` (spec v2, RN-013). Nunca escreva 60, 80, 250, 100 ou 50% no código de `src/`; nos
+  testes de regra, use a fixture `tests/reembolso/Politicas.java`.
 - Valores monetários: **sempre `BigDecimal`**, escala 2 após a RN-002. Nunca `double`/`float`,
   nem como passo intermediário. O JSON é lido com `USE_BIG_DECIMAL_FOR_FLOATS` (DT-001).
 - Erros: entrada inválida → `EntradaInvalidaException` → código de saída 1, sem arquivo de saída.
-  Uso incorreto da CLI → código 2. Falha ao gravar a saída → código 3 (DT-005).
+  Política ou câmbio inválido também → código 1. Uso incorreto da CLI → código 2. Falha ao gravar
+  a saída → código 3 (DT-005, DT-009).
   Mensagens de console sem acentos (o console do Windows os corrompe).
 - Testes: uma classe por RN, `RnNNN<Nome>Test`, com `@DisplayName("RN-NNN / AMB-NNN: <caso>")`.
   O nome do teste precisa permitir chegar à regra da spec sem adivinhar.
@@ -66,5 +68,6 @@ Se o que eu pedi não está coberto por nenhuma task, me avise em vez de impleme
 ## Fora de escopo
 
 Lista oficial na seção 3 da `spec.md`. Em resumo: não paga, não resolve revisões (só sinaliza),
-não lê o conteúdo de notas fiscais, só R$, um colaborador e um período por execução, sem histórico
-entre execuções, sem regras por cargo ou centro de custo. Não invente feature fora disso. Pergunte.
+não lê o conteúdo de notas fiscais, não busca cotações fora do arquivo de câmbio, sem a fila de
+aprovação acima de R$ 500 (item C da v4), um colaborador e um período por execução, sem histórico
+entre execuções, sem regras por cargo. Não invente feature fora disso. Pergunte.
