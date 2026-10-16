@@ -241,9 +241,9 @@ seção 7 que ainda não têm teste — exatamente o papel dele. Não foi deslig
 - [x] **T-029** — Motor v4: passo 0 (tabela), conversão no passo 1, motivo `CAMBIO_INDISPONIVEL` no passo 2, `tabelaAplicada` no resultado; justificativa do novo motivo.
   - **Atende:** seções 8 e 9 da spec, RN-013, RN-014, RN-012
   - **Aceite:** `MotorReembolsoExemploTest` reescrito para as três entradas da seção 9: 216,53 (5/6/3), 1.993,26 (7/2/1) e 373,76 (3/0/1), com status, motivos e grupos de cada tabela; `JustificativaTest` cobre `CAMBIO_INDISPONIVEL`.
-  - **Commit:**
+  - **Commit:** `362c2cd`
 
-- [ ] **T-030** — Saída v4: `valor` em BRL ou `null`; `moeda`, `valor_original`, `taxa_cambio`, `data_cotacao` só em despesa estrangeira; `resumo.tabela_aplicada`.
+- [x] **T-030** — Saída v4: `valor` em BRL ou `null`; `moeda`, `valor_original`, `taxa_cambio`, `data_cotacao` só em despesa estrangeira; `resumo.tabela_aplicada`.
   - **Atende:** seção 4 (saída), AMB-037
   - **Aceite:** `EscritorSaidaTest` passa: exemplo da seção 4 com `tabela_aplicada`; o trecho de e-004 da seção 4 reproduzido; e-006 com `valor` nulo; despesas em BRL sem campos de câmbio.
   - **Commit:**

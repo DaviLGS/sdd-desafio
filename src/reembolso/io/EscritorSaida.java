@@ -57,6 +57,13 @@ public final class EscritorSaida {
             no.put("data", r.despesa().data().toString());
             no.put("categoria", r.despesa().categoria());
             no.put("valor", dinheiro(r.despesa().valor()));
+            if (r.despesa().emMoedaEstrangeira()) {
+                // AMB-037: campos de câmbio só em despesa estrangeira; repetem a entrada e o câmbio usados.
+                no.put("moeda", r.despesa().moeda());
+                no.put("valor_original", r.despesa().valorOriginal());
+                no.put("taxa_cambio", r.despesa().taxaCambio());
+                no.put("data_cotacao", r.despesa().dataCotacao() == null ? null : r.despesa().dataCotacao().toString());
+            }
             no.put("status", r.status().codigo());
             ArrayNode motivos = no.putArray("motivos");
             for (Motivo motivo : r.motivos()) {
@@ -82,6 +89,7 @@ public final class EscritorSaida {
         }
 
         ObjectNode resumo = raiz.putObject("resumo");
+        resumo.put("tabela_aplicada", resultado.tabelaAplicada());
         resumo.put("total_reembolsado", dinheiro(resultado.totalReembolsado()));
         ObjectNode quantidade = resumo.putObject("quantidade");
         for (Status status : Status.values()) {
@@ -90,8 +98,8 @@ public final class EscritorSaida {
         return raiz;
     }
 
-    /** Todo valor monetário da saída tem exatamente 2 casas (spec, seção 9). */
+    /** Todo valor monetário da saída tem exatamente 2 casas (spec, seção 9); sem cotação, {@code null}. */
     private static BigDecimal dinheiro(BigDecimal valor) {
-        return valor.setScale(2, RoundingMode.UNNECESSARY);
+        return valor == null ? null : valor.setScale(2, RoundingMode.UNNECESSARY);
     }
 }

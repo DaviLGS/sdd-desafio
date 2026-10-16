@@ -54,7 +54,7 @@ class EscritorSaidaTest {
                   "valor_total": 110.50, "limite": 60.00, "limite_ampliado": "nenhum",
                   "valor_reembolsado": 60.00 }
               ],
-              "resumo": { "total_reembolsado": 60.00,
+              "resumo": { "tabela_aplicada": "padrao", "total_reembolsado": 60.00,
                           "quantidade": { "aprovada": 2, "em_revisao": 0, "recusada": 0 } }
             }
             """;
@@ -150,5 +150,59 @@ class EscritorSaidaTest {
         String conteudo = Files.readString(arquivo);
         assertTrue(conteudo.contains("Em revisão"), "acento preservado");
         assertEquals(14, MAPPER.readTree(conteudo).get("despesas").size());
+    }
+
+    private static JsonNode saidaDoEnvelope(EscritorSaida escritor) throws Exception {
+        var tabelas = new LeitorPolitica().lerArquivo(Path.of("exemplos", "envelope", "politica-v4.json"));
+        var cambio = new LeitorCambio().lerArquivo(Path.of("exemplos", "envelope", "cambio.json"));
+        var entrada = new LeitorEntrada().lerArquivo(Path.of("exemplos", "envelope", "despesas-envelope.json"));
+        return MAPPER.readTree(escritor.paraTexto(new MotorReembolso(tabelas, cambio).calcular(entrada)));
+    }
+
+    /** Trecho de despesa em moeda estrangeira copiado da seção 4 da spec 2.1. */
+    private static final String E004_DA_SPEC = """
+            { "id": "e-004", "data": "2026-07-18", "categoria": "alimentacao", "valor": 178.80,
+              "moeda": "EUR", "valor_original": 30.00, "taxa_cambio": 5.96, "data_cotacao": "2026-07-17",
+              "status": "aprovada", "motivos": [], "justificativa": "Aprovada; limite aplicado no grupo 2026-07-18/alimentacao." }
+            """;
+
+    @Test
+    @DisplayName("Seção 4 / AMB-037: o trecho de e-004 da spec é reproduzido campo a campo (EUR, cotação de sexta)")
+    void despesa_estrangeira_como_na_spec() throws Exception {
+        assertEquals(MAPPER.readTree(E004_DA_SPEC), saidaDoEnvelope(escritor).get("despesas").get(3));
+    }
+
+    @Test
+    @DisplayName("Seção 4 / RN-014: e-006 (GBP sem cotação) sai com valor, taxa_cambio e data_cotacao nulos")
+    void sem_cotacao_sai_com_nulos() throws Exception {
+        JsonNode e006 = saidaDoEnvelope(escritor).get("despesas").get(5);
+
+        assertEquals("e-006", e006.get("id").asText());
+        assertTrue(e006.get("valor").isNull());
+        assertTrue(e006.get("taxa_cambio").isNull());
+        assertTrue(e006.get("data_cotacao").isNull());
+        assertEquals("GBP", e006.get("moeda").asText());
+        assertEquals("CAMBIO_INDISPONIVEL", e006.get("motivos").get(0).asText());
+    }
+
+    @Test
+    @DisplayName("Seção 4 / AMB-037: despesa em BRL (com moeda BRL ou sem moeda) não tem campos de câmbio")
+    void brl_sem_campos_de_cambio() throws Exception {
+        JsonNode despesas = saidaDoEnvelope(escritor).get("despesas");
+
+        for (int i : new int[] {0, 9}) {   // e-001 ("moeda": "BRL") e e-010 (sem moeda)
+            JsonNode d = despesas.get(i);
+            assertFalse(d.has("moeda") || d.has("valor_original") || d.has("taxa_cambio") || d.has("data_cotacao"),
+                    d.toString());
+        }
+    }
+
+    @Test
+    @DisplayName("Seção 4 / RN-013: resumo.tabela_aplicada traz o centro de custo usado (CC-COMERCIAL)")
+    void tabela_aplicada_no_resumo() throws Exception {
+        JsonNode resumo = saidaDoEnvelope(escritor).get("resumo");
+
+        assertEquals("CC-COMERCIAL", resumo.get("tabela_aplicada").asText());
+        assertEquals("1993.26", resumo.get("total_reembolsado").decimalValue().toPlainString());
     }
 }
