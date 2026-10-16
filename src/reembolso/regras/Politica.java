@@ -23,23 +23,8 @@ public record Politica(
         BigDecimal pisoNotaFiscal,
         BigDecimal percentualAcrescimo) {
 
-    public static final String ALIMENTACAO = "alimentacao";
-    public static final String TRANSPORTE_URBANO = "transporte_urbano";
+    /** Categoria cujas noites geram dias de viagem (RN-005, RN-007). */
     public static final String HOSPEDAGEM = "hospedagem";
-
-    /**
-     * Política v3, montada no formato da v4. Usada só pela CLI até a T-031, que passa a ler a
-     * política do arquivo; será removida nessa task.
-     */
-    @Deprecated
-    public static final Politica V3 = new Politica(
-            "padrao",
-            Map.of(
-                    ALIMENTACAO, new LimiteCategoria(new BigDecimal("60.00"), Periodicidade.DIA),
-                    TRANSPORTE_URBANO, new LimiteCategoria(new BigDecimal("80.00"), Periodicidade.DIA),
-                    HOSPEDAGEM, new LimiteCategoria(new BigDecimal("250.00"), Periodicidade.DIARIA)),
-            new BigDecimal("100.00"),
-            new BigDecimal("50"));
 
     private static final BigDecimal CEM = new BigDecimal("100");
 

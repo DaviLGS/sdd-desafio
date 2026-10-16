@@ -246,9 +246,9 @@ seção 7 que ainda não têm teste — exatamente o papel dele. Não foi deslig
 - [x] **T-030** — Saída v4: `valor` em BRL ou `null`; `moeda`, `valor_original`, `taxa_cambio`, `data_cotacao` só em despesa estrangeira; `resumo.tabela_aplicada`.
   - **Atende:** seção 4 (saída), AMB-037
   - **Aceite:** `EscritorSaidaTest` passa: exemplo da seção 4 com `tabela_aplicada`; o trecho de e-004 da seção 4 reproduzido; e-006 com `valor` nulo; despesas em BRL sem campos de câmbio.
-  - **Commit:**
+  - **Commit:** `a2c0b8a`
 
-- [ ] **T-031** — CLI com `--politica` e `--cambio` obrigatórios; remoção de `Politica.V3`.
+- [x] **T-031** — CLI com `--politica` e `--cambio` obrigatórios; remoção de `Politica.V3`.
   - **Atende:** plano DT-009, AMB-028
   - **Aceite:** `MainCliTest` passa: os três arquivos da seção 9 geram os totais esperados; falta `--politica` ou `--cambio` → código 2; política ou câmbio inválido/inexistente → código 1, sem saída.
   - **Commit:**

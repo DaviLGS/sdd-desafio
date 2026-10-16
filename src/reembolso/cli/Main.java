@@ -4,18 +4,23 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.text.Normalizer;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import reembolso.dominio.Entrada;
 import reembolso.dominio.Resultado;
 import reembolso.dominio.TabelaCambio;
 import reembolso.dominio.TabelaPoliticas;
 import reembolso.io.EntradaInvalidaException;
 import reembolso.io.EscritorSaida;
+import reembolso.io.LeitorCambio;
 import reembolso.io.LeitorEntrada;
+import reembolso.io.LeitorPolitica;
 import reembolso.regras.MotorReembolso;
-import reembolso.regras.Politica;
 
 /**
- * CLI: {@code calcular --input <entrada.json> --output <saida.json>}.
+ * CLI: {@code calcular --input <despesas.json> --politica <politica.json> --cambio <cambio.json>
+ * --output <saida.json>}, opções em qualquer ordem, todas obrigatórias (plano, DT-009).
  *
  * <p>Códigos de saída (plano, DT-005): 0 sucesso; 1 entrada inválida; 2 uso incorreto;
  * 3 falha ao gravar a saída.
@@ -27,8 +32,10 @@ public final class Main {
     static final int USO_INCORRETO = 2;
     static final int FALHA_AO_GRAVAR = 3;
 
-    private static final String USO =
-            "uso: java -jar motor-reembolso.jar calcular --input <entrada.json> --output <saida.json>";
+    private static final String USO = "uso: java -jar motor-reembolso.jar calcular --input <despesas.json>"
+            + " --politica <politica.json> --cambio <cambio.json> --output <saida.json>";
+
+    private static final List<String> OPCOES = List.of("--input", "--politica", "--cambio", "--output");
 
     private Main() {
     }
@@ -53,11 +60,10 @@ public final class Main {
             return USO_INCORRETO;
         }
 
-        Path entrada = null;
-        Path saida = null;
+        Map<String, Path> opcoes = new HashMap<>();
         for (int i = 1; i < args.length; i++) {
             String opcao = args[i];
-            if (!opcao.equals("--input") && !opcao.equals("--output")) {
+            if (!OPCOES.contains(opcao)) {
                 console(err, "opção desconhecida: " + opcao);
                 console(err, USO);
                 return USO_INCORRETO;
@@ -67,30 +73,41 @@ public final class Main {
                 console(err, USO);
                 return USO_INCORRETO;
             }
-            Path valor = Path.of(args[++i]);
-            if (opcao.equals("--input")) {
-                entrada = valor;
-            } else {
-                saida = valor;
+            opcoes.put(opcao, Path.of(args[++i]));
+        }
+        for (String opcao : OPCOES) {
+            if (!opcoes.containsKey(opcao)) {
+                console(err, "falta " + opcao);
+                console(err, USO);
+                return USO_INCORRETO;
             }
         }
-        if (entrada == null || saida == null) {
-            console(err, entrada == null ? "falta --input" : "falta --output");
-            console(err, USO);
-            return USO_INCORRETO;
-        }
+        Path saida = opcoes.get("--output");
 
-        Resultado resultado;
+        // DT-009: os três arquivos são lidos antes de calcular; qualquer um inválido → código 1, sem saída.
+        Entrada entrada;
+        TabelaPoliticas politica;
+        TabelaCambio cambio;
         try {
-            // Até a T-031: só a tabela padrão (valores da v3) e nenhum câmbio.
-            TabelaPoliticas v3 = new TabelaPoliticas(Map.of(), Politica.V3.categorias(),
-                    Politica.V3.pisoNotaFiscal(), Politica.V3.percentualAcrescimo());
-            resultado = new MotorReembolso(v3, new TabelaCambio(Map.of()))
-                    .calcular(new LeitorEntrada().lerArquivo(entrada));
+            entrada = new LeitorEntrada().lerArquivo(opcoes.get("--input"));
         } catch (EntradaInvalidaException e) {
             console(err, "entrada inválida: " + e.getMessage());
             return ENTRADA_INVALIDA;
         }
+        try {
+            politica = new LeitorPolitica().lerArquivo(opcoes.get("--politica"));
+        } catch (EntradaInvalidaException e) {
+            console(err, "política inválida: " + e.getMessage());
+            return ENTRADA_INVALIDA;
+        }
+        try {
+            cambio = new LeitorCambio().lerArquivo(opcoes.get("--cambio"));
+        } catch (EntradaInvalidaException e) {
+            console(err, "câmbio inválido: " + e.getMessage());
+            return ENTRADA_INVALIDA;
+        }
+
+        Resultado resultado = new MotorReembolso(politica, cambio).calcular(entrada);
 
         try {
             new EscritorSaida().escrever(resultado, saida);
@@ -100,7 +117,7 @@ public final class Main {
         }
 
         console(out, "reembolso calculado: R$ " + resultado.totalReembolsado().toPlainString()
-                + " - saida gravada em " + saida);
+                + " (tabela " + resultado.tabelaAplicada() + ") - saida gravada em " + saida);
         return SUCESSO;
     }
 }
