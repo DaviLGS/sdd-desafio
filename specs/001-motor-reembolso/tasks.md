@@ -1,6 +1,6 @@
 # Tasks — Motor de Cálculo de Reembolso
 
-**Baseado na spec:** 1.5 · **Baseado no plano:** 1.0
+**Baseado na spec:** 2.1 · **Baseado no plano:** 2.0
 
 > Cada task é pequena o bastante para virar **um commit**. Se você não consegue
 > descrever o critério de aceite como "o teste X passa", a task está grande demais.
@@ -198,10 +198,66 @@ regra entrega o código **e** o teste no mesmo commit (ou em `feat` + `test` em 
 
 ---
 
-## Fase 6 — Envelope (criar no Dia 2)
+## Fase 6 — Envelope do Dia 2: Política v4 (D-006, D-007)
 
-<Novas tasks a partir da mudança de requisito. Numeração continua de onde parou —
-não reinicie e não renumere as antigas: a numeração é o eixo da rastreabilidade.>
+Ponto de partida: `5f7712c`. Spec 2.1, plano 2.0. Ao fim de cada task, **todos** os testes
+passam — os testes da v1 que dependiam de `Politica.V3` ou do total 680,53 são ajustados na
+task que os quebra, e o ajuste é citado no commit.
+
+- [ ] **T-023** — `Politica` configurável: `LimiteCategoria` e `Periodicidade` no domínio; `Politica` resolvida por tabela (`elegivel`, `periodicidade`, `limiteDiario`, `limitePorNoite`, percentual e piso); remoção de `Politica.V3`; fixture `tests/reembolso/Politicas.java` com a tabela padrão; `LimiteDiario`, `LimiteHospedagem` e `Estornos` agrupam pela `periodicidade`.
+  - **Atende:** RN-003, RN-004, RN-005, RN-011 (periodicidade), AMB-023, AMB-026, AMB-027
+  - **Aceite:** `PoliticaTest` (reescrito) passa: limite 0 → não elegível; categoria ausente → não elegível; ampliado = base × 1,5; `representacao` de periodicidade `dia` forma grupo diário (`Rn004LimiteDiarioTest`); todos os testes da v1 passam usando a fixture.
+  - **Commit:**
+
+- [ ] **T-024** — Leitura e validação do arquivo de política (`io.LeitorPolitica` → `TabelaPoliticas`).
+  - **Atende:** seção 4 (arquivo de política), AMB-028, AMB-029
+  - **Aceite:** `LeitorPoliticaTest` passa: lê `politica-v4.json` (padrão + 3 CCs, piso 100, percentual 50); `vigencia` ignorada; rejeita arquivo ausente, sem `padrao`, `limite` negativo ou não numérico, `periodicidade` desconhecida.
+  - **Commit:**
+
+- [ ] **T-025** — Seleção da tabela por centro de custo (`regras.SelecaoTabela`).
+  - **Atende:** RN-013, RN-001 (categorias da política), AMB-021, AMB-022, AMB-025
+  - **Aceite:** `Rn013TabelaCentroCustoTest` passa: `CC-COMERCIAL` → tabela própria; `CC-SUPORTE-N2` → `padrao`; `CC-ADM` sem hospedagem → hospedagem não elegível; `" CC-COMERCIAL "` → `CC-COMERCIAL`; `cc-comercial` → `padrao`; `representacao` só no `CC-COMERCIAL`.
+  - **Commit:**
+
+- [ ] **T-026** — Leitura do câmbio (`io.LeitorCambio` → `TabelaCambio`) e campo `moeda` na entrada.
+  - **Atende:** seção 4 (arquivo de câmbio, campo `moeda`), AMB-028
+  - **Aceite:** `LeitorCambioTest` passa (lê `cambio.json`; rejeita taxa não numérica e data inválida); `LeitorEntradaTest` passa com `moeda` presente, ausente (= `BRL`) e não textual (rejeitada).
+  - **Commit:**
+
+- [ ] **T-027** — Conversão de moeda (`regras.ConversaoMoeda`).
+  - **Atende:** RN-014, RN-002, AMB-030, AMB-031, AMB-032, AMB-033, AMB-036
+  - **Aceite:** `Rn014ConversaoMoedaTest` passa: EUR 22 em 14/07 → 130,46; sábado 18/07 → cotação de 17/07; GBP → sem cotação; 10/07 → sem cotação; 30/07 → cotação de 28/07; BRL e sem moeda → sem conversão; USD 10,005 × 5,42 → 54,23; estorno −USD 10 → −55,00.
+  - **Commit:**
+
+- [ ] **T-028** — Regras existentes com valor convertido: NF em BRL e ignorada sem cotação; `moeda` na duplicata; estorno pelo sinal do valor original.
+  - **Atende:** RN-006, RN-009, RN-011, AMB-034, AMB-035
+  - **Aceite:** `Rn006NotaFiscalTest` (USD 40 = 220 sem NF → `NF_AUSENTE`; `valor` nulo → sem motivo), `Rn009DuplicataTest` (EUR 22 × USD 22 → não duplicata; sem moeda × BRL → duplicata) e `Rn011EstornoTest` passam.
+  - **Commit:**
+
+- [ ] **T-029** — Motor v4: passo 0 (tabela), conversão no passo 1, motivo `CAMBIO_INDISPONIVEL` no passo 2, `tabelaAplicada` no resultado; justificativa do novo motivo.
+  - **Atende:** seções 8 e 9 da spec, RN-013, RN-014, RN-012
+  - **Aceite:** `MotorReembolsoExemploTest` reescrito para as três entradas da seção 9: 216,53 (5/6/3), 1.993,26 (7/2/1) e 373,76 (3/0/1), com status, motivos e grupos de cada tabela; `JustificativaTest` cobre `CAMBIO_INDISPONIVEL`.
+  - **Commit:**
+
+- [ ] **T-030** — Saída v4: `valor` em BRL ou `null`; `moeda`, `valor_original`, `taxa_cambio`, `data_cotacao` só em despesa estrangeira; `resumo.tabela_aplicada`.
+  - **Atende:** seção 4 (saída), AMB-037
+  - **Aceite:** `EscritorSaidaTest` passa: exemplo da seção 4 com `tabela_aplicada`; o trecho de e-004 da seção 4 reproduzido; e-006 com `valor` nulo; despesas em BRL sem campos de câmbio.
+  - **Commit:**
+
+- [ ] **T-031** — CLI com `--politica` e `--cambio` obrigatórios.
+  - **Atende:** plano DT-009, AMB-028
+  - **Aceite:** `MainCliTest` passa: os três arquivos da seção 9 geram os totais esperados; falta `--politica` ou `--cambio` → código 2; política ou câmbio inválido/inexistente → código 1, sem saída.
+  - **Commit:**
+
+- [ ] **T-032** — Casos de borda da v4 (16 linhas novas da seção 7).
+  - **Atende:** seção 7 da spec
+  - **Aceite:** `CasosDeBordaTest` passa com um teste por linha da seção 7, incluindo as 16 novas; o teste de rastreabilidade contra a spec passa.
+  - **Commit:**
+
+- [ ] **T-033** — README e `CLAUDE.md` atualizados para a v4 (comando com `--politica` e `--cambio`, resultados dos três exemplos).
+  - **Atende:** entrega (README)
+  - **Aceite:** seguindo só o README, num clone limpo, os três comandos geram 216,53, 1.993,26 e 373,76.
+  - **Commit:**
 
 ---
 
@@ -224,6 +280,10 @@ exatamente a matriz que a correção vai montar.
 | RN-010 | T-007 | `Rn010PeriodoCompetenciaTest` |
 | RN-011 | T-016 | `Rn011EstornoTest` |
 | RN-012 | T-011 | `Rn012StatusTest` |
+| RN-013 | T-025 | `Rn013TabelaCentroCustoTest` |
+| RN-014 | T-027 | `Rn014ConversaoMoedaTest` |
+| RN-003/004/005 (v4: tabela e periodicidade) | T-023 | `PoliticaTest`, `Rn004LimiteDiarioTest` |
+| RN-006, RN-009, RN-011 (v4: valor convertido) | T-028 | `Rn006NotaFiscalTest`, `Rn009DuplicataTest`, `Rn011EstornoTest` |
 | AMB-001, 002, 003, 005 | T-014 | `Rn004LimiteDiarioTest` |
 | AMB-004 | T-010, T-015 | `Rn005NoitesHospedagemTest`, `Rn005LimiteHospedagemTest` |
 | AMB-006, 007, 008, 009 | T-009 | `Rn006NotaFiscalTest` |
@@ -235,6 +295,13 @@ exatamente a matriz que a correção vai montar.
 | AMB-017, 018 | T-007 | `Rn010PeriodoCompetenciaTest` |
 | AMB-019 | T-016 | `Rn011EstornoTest` |
 | AMB-020 | T-004 | `Rn001NormalizacaoCategoriaTest` |
+| AMB-021, 022, 025 | T-025 | `Rn013TabelaCentroCustoTest` |
+| AMB-023, 026, 027 | T-023 | `PoliticaTest` |
+| AMB-024 | T-029, T-032 | `MotorReembolsoExemploTest`, `CasosDeBordaTest` |
+| AMB-028, 029 | T-024, T-026, T-031 | `LeitorPoliticaTest`, `LeitorCambioTest`, `MainCliTest` |
+| AMB-030 a 033, 036 | T-027 | `Rn014ConversaoMoedaTest` |
+| AMB-034, 035 | T-028 | `Rn006NotaFiscalTest`, `Rn009DuplicataTest` |
+| AMB-037 | T-030 | `EscritorSaidaTest` |
 | Seção 4 (entrada/saída) | T-005, T-018, T-019, T-020 | `LeitorEntradaTest`, `JustificativaTest`, `EscritorSaidaTest`, `MainCliTest` |
-| Seção 7 (casos de borda) | T-021 | `CasosDeBordaTest` |
-| Seções 8 e 9 (ordem e aceite) | T-017 | `MotorReembolsoExemploTest` |
+| Seção 7 (casos de borda) | T-021, T-032 | `CasosDeBordaTest` |
+| Seções 8 e 9 (ordem e aceite) | T-017, T-029 | `MotorReembolsoExemploTest` |
