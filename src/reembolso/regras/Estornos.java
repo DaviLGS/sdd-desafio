@@ -68,8 +68,9 @@ public final class Estornos {
         return atualizados;
     }
 
+    /** Pelo sinal do valor original: um estorno sem cotação (valor em BRL nulo) continua sendo estorno. */
     private static boolean estorno(Despesa despesa) {
-        return despesa.valor().signum() < 0;
+        return despesa.valorOriginal().signum() < 0;
     }
 
     private static ResultadoDespesa semDespesa(ResultadoDespesa resultado) {

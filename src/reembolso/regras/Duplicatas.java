@@ -16,13 +16,17 @@ public final class Duplicatas {
     private Duplicatas() {
     }
 
-    /** Campos comparados pela RN-009. O valor é comparado numericamente (54.9 = 54.90). */
+    /**
+     * Campos comparados pela RN-009: o valor e a moeda como informados (AMB-035). O valor é
+     * comparado numericamente (54.9 = 54.90); moeda ausente já chega como BRL.
+     */
     private record Chave(
             LocalDate data,
             String categoria,
             String descricao,
             String fornecedor,
-            BigDecimal valor,
+            BigDecimal valorOriginal,
+            String moeda,
             boolean temNotaFiscal) {
 
         static Chave de(Despesa despesa) {
@@ -31,7 +35,8 @@ public final class Duplicatas {
                     despesa.categoria(),
                     despesa.descricao(),
                     despesa.fornecedor(),
-                    despesa.valor().stripTrailingZeros(),
+                    despesa.valorOriginal().stripTrailingZeros(),
+                    despesa.moeda(),
                     despesa.temNotaFiscal());
         }
     }

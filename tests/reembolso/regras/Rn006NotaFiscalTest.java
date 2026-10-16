@@ -86,4 +86,23 @@ class Rn006NotaFiscalTest {
     void nf_ausente_leva_a_revisao() {
         assertEquals(Status.EM_REVISAO, Motivo.NF_AUSENTE.statusResultante());
     }
+
+
+    private static reembolso.dominio.Despesa estrangeira(String valorBrl, String valorOriginal, String moeda, boolean nf) {
+        return new reembolso.dominio.Despesa("e-1", java.time.LocalDate.parse("2026-07-20"), "transporte_urbano",
+                "transporte_urbano", "Corridas", "F", valorBrl == null ? null : new BigDecimal(valorBrl), nf, moeda,
+                new BigDecimal(valorOriginal), null, null);
+    }
+
+    @Test
+    @DisplayName("RN-006 / AMB-034: USD 40,00 convertido em R$ 220,00, sem NF (e-005) → NF_AUSENTE (compara em BRL)")
+    void nf_comparada_em_brl() {
+        assertEquals(Optional.of(Motivo.NF_AUSENTE), NotaFiscal.verificar(estrangeira("220.00", "40.00", "USD", false), Politicas.PADRAO));
+    }
+
+    @Test
+    @DisplayName("RN-006 / RN-014: sem cotação (valor em BRL nulo) a NF não é avaliada")
+    void sem_cotacao_nao_avalia_nf() {
+        assertEquals(Optional.empty(), NotaFiscal.verificar(estrangeira(null, "500.00", "GBP", false), Politicas.PADRAO));
+    }
 }

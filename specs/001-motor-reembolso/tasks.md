@@ -231,9 +231,9 @@ seção 7 que ainda não têm teste — exatamente o papel dele. Não foi deslig
 - [x] **T-027** — Conversão de moeda (`regras.ConversaoMoeda`).
   - **Atende:** RN-014, RN-002, AMB-030, AMB-031, AMB-032, AMB-033, AMB-036
   - **Aceite:** `Rn014ConversaoMoedaTest` passa: EUR 22 em 14/07 → 130,46; sábado 18/07 → cotação de 17/07; GBP → sem cotação; 10/07 → sem cotação; 30/07 → cotação de 28/07; BRL e sem moeda → sem conversão; USD 10,005 × 5,42 → 54,23; estorno −USD 10 → −55,00.
-  - **Commit:**
+  - **Commit:** `0d7aba5`
 
-- [ ] **T-028** — Regras existentes com valor convertido: NF em BRL e ignorada sem cotação; `moeda` na duplicata; estorno pelo sinal do valor original.
+- [x] **T-028** — Regras existentes com valor convertido: NF em BRL e ignorada sem cotação; `moeda` na duplicata; estorno pelo sinal do valor original.
   - **Atende:** RN-006, RN-009, RN-011, AMB-034, AMB-035
   - **Aceite:** `Rn006NotaFiscalTest` (USD 40 = 220 sem NF → `NF_AUSENTE`; `valor` nulo → sem motivo), `Rn009DuplicataTest` (EUR 22 × USD 22 → não duplicata; sem moeda × BRL → duplicata) e `Rn011EstornoTest` passam.
   - **Commit:**

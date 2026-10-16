@@ -98,4 +98,33 @@ class Rn009DuplicataTest {
     void duplicata_leva_a_revisao() {
         assertEquals(Status.EM_REVISAO, Motivo.DUPLICATA.statusResultante());
     }
+
+
+    private static Despesa comMoeda(String id, String valor, String moeda) {
+        return new Despesa(id, LocalDate.parse("2026-07-14"), "alimentacao", "alimentacao", "Almoco", "Taberna",
+                null, true, moeda, new BigDecimal(valor), null, null);
+    }
+
+    @Test
+    @DisplayName("RN-009 / AMB-035: EUR 22,00 e USD 22,00 com os demais campos iguais → não são duplicatas")
+    void moedas_diferentes_nao_sao_duplicatas() {
+        assertTrue(Duplicatas.identificar(List.of(comMoeda("e-1", "22.00", "EUR"), comMoeda("e-2", "22.00", "USD"))).isEmpty());
+    }
+
+    @Test
+    @DisplayName("RN-009 / AMB-035: 22,00 sem moeda (= BRL) e 22,00 BRL com os demais campos iguais → duplicatas")
+    void sem_moeda_e_brl_sao_duplicatas() {
+        var semMoeda = despesa("e-1", "2026-07-14", "alimentacao", "22.00", true, "Almoco");
+        var brl = new Despesa("e-2", LocalDate.parse("2026-07-14"), "alimentacao", "alimentacao", "Almoco", "Fornecedor",
+                new BigDecimal("22.00"), true, "BRL", new BigDecimal("22.00"), null, null);
+
+        assertEquals(Set.of("e-1", "e-2"), Duplicatas.identificar(List.of(semMoeda, brl)));
+    }
+
+    @Test
+    @DisplayName("RN-009 / AMB-035: compara o valor original (EUR 22,00 duas vezes → duplicatas, mesmo sem cotação)")
+    void compara_valor_original() {
+        assertEquals(Set.of("e-1", "e-2"),
+                Duplicatas.identificar(List.of(comMoeda("e-1", "22.00", "EUR"), comMoeda("e-2", "22.0", "EUR"))));
+    }
 }

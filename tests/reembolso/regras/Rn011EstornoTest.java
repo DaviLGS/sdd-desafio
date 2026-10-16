@@ -211,4 +211,33 @@ class Rn011EstornoTest {
 
         assertEquals(List.of("d-1", "d-2"), resultados.stream().map(r -> r.despesa().id()).toList());
     }
+
+
+    @Test
+    @DisplayName("RN-011 / RN-014 / D-005: estorno sem cotação (GBP) continua estorno e recebe ESTORNO_SEM_DESPESA")
+    void estorno_sem_cotacao() {
+        var estorno = new Despesa("e-1", java.time.LocalDate.parse("2026-07-21"), "transporte_urbano", "transporte_urbano",
+                "Estorno", "F", null, false, "GBP", new BigDecimal("-10.00"), null, null);
+        var emRevisao = new ResultadoDespesa(estorno, Status.EM_REVISAO, List.of(Motivo.CAMBIO_INDISPONIVEL), "");
+
+        ResultadoDespesa resultado = aplicar(List.of(emRevisao)).get(0);
+
+        assertEquals(List.of(Motivo.CAMBIO_INDISPONIVEL, Motivo.ESTORNO_SEM_DESPESA), resultado.motivos());
+    }
+
+    @Test
+    @DisplayName("RN-011 / AMB-036: estorno convertido abate em BRL — USD 50 (275,00) + −USD 10 (−55,00) → total 220,00")
+    void estorno_estrangeiro_abate_em_brl() {
+        var taxi = new Despesa("d-1", java.time.LocalDate.parse("2026-07-20"), "transporte_urbano", "transporte_urbano",
+                "Corrida", "F", new BigDecimal("275.00"), true, "USD", new BigDecimal("50.00"), new BigDecimal("5.50"),
+                java.time.LocalDate.parse("2026-07-20"));
+        var estorno = new Despesa("d-2", java.time.LocalDate.parse("2026-07-20"), "transporte_urbano", "transporte_urbano",
+                "Estorno", "F", new BigDecimal("-55.00"), false, "USD", new BigDecimal("-10.00"), new BigDecimal("5.50"),
+                java.time.LocalDate.parse("2026-07-20"));
+
+        Grupo grupo = grupos(aplicar(List.of(aprovada(taxi), aprovada(estorno)))).get(0);
+
+        assertEquals(new BigDecimal("220.00"), grupo.valorTotal());
+        assertEquals(new BigDecimal("80.00"), grupo.valorReembolsado());
+    }
 }
